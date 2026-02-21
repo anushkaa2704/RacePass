@@ -1,0 +1,209 @@
+{
+  "name": "RacePass KYC Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kyc",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-node",
+      "name": "Webhook - Receive KYC",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "racepass-kyc"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-aadhaar",
+              "leftValue": "={{ $json.kycData.aadhaarNumber.length }}",
+              "rightValue": 12,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "condition-wallet",
+              "leftValue": "={{ $json.walletAddress.startsWith('0x') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "condition-name",
+              "leftValue": "={{ $json.kycData.fullName.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "condition-dob",
+              "leftValue": "={{ $json.kycData.dateOfBirth.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-validate",
+      "name": "IF - Validate KYC",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Calculate age from DOB\nconst dob = new Date(input.kycData.dateOfBirth);\nconst now = new Date();\nlet age = now.getFullYear() - dob.getFullYear();\nconst m = now.getMonth() - dob.getMonth();\nif (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;\n\nreturn [{\n  json: {\n    ...input,\n    computedAge: age,\n    isAdult: age >= 18,\n    ageCategory: age >= 21 ? '21+' : age >= 18 ? '18+' : 'under-18',\n    processedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-enrich",
+      "name": "Code - Enrich Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/api/kyc/process",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"walletAddress\": \"{{ $json.walletAddress }}\",\n  \"kycData\": {{ JSON.stringify($json.kycData) }},\n  \"kycStatus\": \"approved\",\n  \"computedAge\": {{ $json.computedAge }},\n  \"isAdult\": {{ $json.isAdult }},\n  \"ageCategory\": \"{{ $json.ageCategory }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "http-backend",
+      "name": "HTTP - Call Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"KYC verified and credential created via n8n\",\n  \"data\": {{ JSON.stringify($json.data || $json) }},\n  \"processedVia\": \"n8n\"\n}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Respond - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"KYC validation failed. Please check your data.\",\n  \"errors\": [\n    \"Aadhaar must be exactly 12 digits\",\n    \"Wallet address must start with 0x\",\n    \"Full name is required\",\n    \"Date of birth is required\"\n  ],\n  \"processedVia\": \"n8n\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-failure",
+      "name": "Respond - Validation Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [690, 450]
+    },
+    {
+      "parameters": {
+        "content": "## RacePass KYC Workflow\n\n### Flow:\n1. **Webhook** receives KYC from frontend\n2. **IF** validates Aadhaar (12 digits), wallet (0x), name, DOB\n3. **Code** enriches data: calculates age, adult status\n4. **HTTP** calls backend to create credential\n5. **Respond** returns success/failure to frontend\n\n### Webhook URL:\n`POST http://localhost:5678/webhook/kyc`\n\n### Body:\n```json\n{\n  \"walletAddress\": \"0x...\",\n  \"kycData\": {\n    \"fullName\": \"...\",\n    \"dateOfBirth\": \"YYYY-MM-DD\",\n    \"aadhaarNumber\": \"123456789012\"\n  }\n}\n```\n\n### Make sure:\n- Backend running on port 3001\n- This workflow is **ACTIVATED**",
+        "height": 420,
+        "width": 360
+      },
+      "id": "sticky-note",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 0]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive KYC": {
+      "main": [
+        [
+          {
+            "node": "IF - Validate KYC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Validate KYC": {
+      "main": [
+        [
+          {
+            "node": "Code - Enrich Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Validation Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Enrich Data": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Call Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Call Backend": {
+      "main": [
+        [
+          {
+            "node": "Respond - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}
