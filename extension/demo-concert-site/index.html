@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electric Dreams Festival 2025 — Demo Concert Site</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0a1e;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1e0a3e 0%, #2d1054 50%, #0f0a1e 100%);
+      padding: 60px 20px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(255, 107, 107, 0.08) 0%, transparent 50%);
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 900;
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: #ff6b6b; }
+    .hero p {
+      color: #94a3b8;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: -40px auto 40px;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 36px;
+      backdrop-filter: blur(10px);
+    }
+
+    .login-card h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .login-card .sub {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .age-notice {
+      background: rgba(255, 107, 107, 0.08);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #ff8a8a;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ── Standard login form ── */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: #8b5cf6;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    /*
+     * ══════════════════════════════════════════
+     * THIS IS THE KEY PART FOR RACEPASS:
+     * 
+     * The div below has data-racepass="true"
+     * The RacePass content script will find it
+     * and inject a "Continue with RacePass" button
+     * ══════════════════════════════════════════
+     */
+
+    /* ── Success state ── */
+    .success-card {
+      display: none;
+      background: rgba(0, 255, 136, 0.04);
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+    }
+    .success-card.show { display: block; }
+    .success-card .icon { font-size: 64px; margin-bottom: 16px; }
+    .success-card h2 { color: #00ff88; margin-bottom: 8px; }
+    .success-card p { color: #94a3b8; font-size: 14px; }
+
+    .ticket {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+      color: white;
+    }
+    .ticket .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .ticket .event {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 6px 0;
+    }
+    .ticket .addr {
+      font-size: 12px;
+      font-family: monospace;
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #475569;
+      font-size: 13px;
+    }
+    footer a { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>🎸 <span>Electric Dreams</span> Festival</h1>
+    <p>The biggest music event of 2025</p>
+  </div>
+
+  <div class="container">
+    <!-- Login Card -->
+    <div class="login-card" id="login-card">
+      <h2>🎫 Get Your Ticket</h2>
+      <p class="sub">Log in to claim your festival pass</p>
+
+      <div class="age-notice">⚠️ This is an 18+ event. Age verification required.</div>
+
+      <!-- Standard email/password login -->
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <button class="login-btn">Sign In</button>
+
+      <!--
+        ════════════════════════════════════════════════════
+        RACEPASS INTEGRATION POINT
+
+        This div tells the RacePass Chrome Extension:
+        "Hey, inject your 'Continue with RacePass' button here!"
+
+        Attributes:
+          data-racepass="true"   → Enables RacePass button injection
+          data-min-age="18"      → Requires age 18+ for this event
+          data-event-type="concert" → Event identifier for logging
+        ════════════════════════════════════════════════════
+      -->
+      <div
+        data-racepass="true"
+        data-min-age="18"
+        data-event-type="concert"
+      ></div>
+    </div>
+
+    <!-- Success Card (shown after verification) -->
+    <div class="success-card" id="success-card">
+      <div class="icon">🎉</div>
+      <h2>Access Granted!</h2>
+      <p>Your identity was verified. Enjoy the festival!</p>
+      <div class="ticket">
+        <div class="label">VIP Ticket</div>
+        <div class="event">Electric Dreams Festival 2025</div>
+        <div class="addr" id="ticket-address">0x...</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>This is a demo site to showcase <a href="http://localhost:5173">RacePass</a> Chrome Extension integration.</p>
+    <p style="margin-top: 8px">No real data is collected. Built for hackathon demo.</p>
+  </footer>
+
+  <script>
+    /**
+     * WEBSITE-SIDE CODE
+     *
+     * This is what a third-party website developer would write
+     * to integrate with RacePass.
+     *
+     * They just need to:
+     * 1. Add the data-racepass div (done above in HTML)
+     * 2. Listen for the 'racepass:verified' event (below)
+     *
+     * That's it! The extension handles everything else.
+     */
+
+    // Listen for RacePass verification result
+    window.addEventListener('racepass:verified', function (e) {
+      console.log('RacePass verification received:', e.detail)
+
+      if (e.detail.verified) {
+        // User is verified! Show the success card with ticket
+        document.getElementById('login-card').style.display = 'none'
+        const successCard = document.getElementById('success-card')
+        successCard.classList.add('show')
+
+        // Show wallet address on ticket
+        if (e.detail.walletAddress) {
+          const addr = e.detail.walletAddress
+          document.getElementById('ticket-address').textContent =
+            addr.slice(0, 8) + '...' + addr.slice(-6)
+        }
+      }
+    })
+
+    // Also listen via postMessage (alternative method)
+    window.addEventListener('message', function (e) {
+      if (e.data?.source === 'racepass-extension' && e.data.type === 'VERIFICATION_RESULT') {
+        if (e.data.verified) {
+          document.getElementById('login-card').style.display = 'none'
+          const successCard = document.getElementById('success-card')
+          successCard.classList.add('show')
+
+          if (e.data.walletAddress) {
+            const addr = e.data.walletAddress
+            document.getElementById('ticket-address').textContent =
+              addr.slice(0, 8) + '...' + addr.slice(-6)
+          }
+        }
+      }
+    })
+  </script>
+</body>
+</html>

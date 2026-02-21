@@ -8,9 +8,9 @@ import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 
 const FEATURES = [
-  { icon: '🔒', title: 'Privacy First', desc: 'Your personal data never touches the blockchain. Only a cryptographic fingerprint is stored.', color: '#00d9ff' },
-  { icon: '📷', title: 'Aadhaar OCR', desc: 'Upload your Aadhaar card — we extract DOB automatically using in-browser OCR. No data leaves your device.', color: '#8b5cf6' },
-  { icon: '🎂', title: 'Age Verification', desc: 'Events get a simple "is 18+" boolean. They never see your name, DOB, or Aadhaar number.', color: '#00ff88' },
+  { icon: '🔒', title: 'Privacy First', desc: 'Verify your identity once — no personal data is ever stored or shared.', color: '#00d9ff' },
+  { icon: '📷', title: 'Quick KYC', desc: 'Upload your document, get verified in seconds, and you\'re good to go.', color: '#8b5cf6' },
+  { icon: '🎂', title: 'Age Verification', desc: 'Events instantly know if you meet the age requirement — nothing more.', color: '#00ff88' },
   { icon: '⚡', title: 'Cross-Chain', desc: 'Verify on Ethereum and Polygon testnets. One identity, multiple chains.', color: '#ffc107' },
   { icon: '✅', title: 'One-Time KYC', desc: 'Verify once, use everywhere. No need to re-submit for every service.', color: '#06b6d4' },
   { icon: '🗑️', title: 'Self-Sovereign', desc: 'You own your identity. Revoke your RacePass anytime — full control, zero lock-in.', color: '#ff6b6b' }
@@ -81,7 +81,7 @@ function HomePage() {
 
         <p className="page-description" style={{ fontSize: '17px', marginTop: '16px' }}>
           RacePass lets you verify your identity once and use it everywhere.
-          Upload your Aadhaar, get verified in seconds, and access events — all while keeping your data private.
+          Get verified in seconds and access events — all while keeping your data private.
         </p>
       </div>
 
@@ -113,7 +113,7 @@ function HomePage() {
       >
         <h2 className="card-title" style={{ textAlign: 'center' }}>How It Works</h2>
         <div className="steps">
-          {['Connect Wallet', 'Upload Aadhaar', 'Get Verified', 'Access Events'].map((label, i) => (
+          {['Connect Wallet', 'Upload Document', 'Get Verified', 'Access Events'].map((label, i) => (
             <div key={i} className="step active" style={{
               opacity: stepsVisible ? 1 : 0,
               transform: stepsVisible ? 'translateY(0)' : 'translateY(15px)',

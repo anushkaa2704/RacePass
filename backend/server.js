@@ -33,9 +33,23 @@ const app = express()
 // MIDDLEWARE
 // ============================================
 
-// Enable CORS - allows frontend to call our API
+// Enable CORS - allows frontend and Chrome extension to call our API
+// Chrome extension service workers send origin as chrome-extension://EXTENSION_ID
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5678'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Chrome extension background scripts)
+    if (!origin) return callback(null, true)
+    // Allow localhost and chrome extensions
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5678'
+    ]
+    if (allowed.includes(origin) || origin.startsWith('chrome-extension://')) {
+      return callback(null, true)
+    }
+    callback(null, true) // allow all for local demo
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }))

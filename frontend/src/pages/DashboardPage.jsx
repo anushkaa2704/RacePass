@@ -141,10 +141,10 @@ function DashboardPage({
 
   const privacyScore = isVerified ? 100 : 0
   const privacyItems = [
-    { label: 'Personal data NOT stored on server', ok: true },
-    { label: 'Only SHA-256 hash on-chain', ok: true },
-    { label: 'No name / Aadhaar shared with 3rd parties', ok: true },
-    { label: 'Self-sovereign: you can revoke anytime', ok: true }
+    { label: 'Your data stays private', ok: true },
+    { label: 'Verified on blockchain', ok: true },
+    { label: 'No personal info shared with events', ok: true },
+    { label: 'Revoke anytime — full control', ok: true }
   ]
 
   if (!isWalletConnected) {

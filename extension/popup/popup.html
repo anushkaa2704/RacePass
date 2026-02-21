@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RacePass</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">Race<span>Pass</span></div>
+      <div id="network-badge" class="network-badge">Sepolia</div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-view" class="view">
+      <div class="spinner"></div>
+      <p class="subtitle">Connecting...</p>
+    </div>
+
+    <!-- Not Connected State -->
+    <div id="connect-view" class="view hidden">
+      <div class="icon-large">🔗</div>
+      <h2>Connect Wallet</h2>
+      <p class="subtitle">Connect MetaMask to get started</p>
+      <button id="connect-btn" class="btn btn-primary">
+        🦊 Connect MetaMask
+      </button>
+      <p class="hint">Make sure MetaMask extension is installed</p>
+    </div>
+
+    <!-- Connected but NOT Verified -->
+    <div id="not-verified-view" class="view hidden">
+      <div class="icon-large">❌</div>
+      <h2>Not Verified</h2>
+      <p id="wallet-address-nv" class="wallet-address"></p>
+      <p class="subtitle">Complete KYC to activate RacePass</p>
+      <button id="kyc-btn" class="btn btn-primary">
+        🚀 Complete KYC
+      </button>
+      <button id="refresh-btn-nv" class="btn btn-secondary">🔄 Refresh</button>
+    </div>
+
+    <!-- Connected & Verified -->
+    <div id="verified-view" class="view hidden">
+      <div class="icon-large">✅</div>
+      <h2>RacePass Active</h2>
+      <p id="wallet-address-v" class="wallet-address"></p>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span id="age-status" class="badge badge-green">Verified</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Age</span>
+          <span id="age-category" class="badge badge-blue">18+</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Expires</span>
+          <span id="expires-at" class="info-value">—</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Credential</span>
+          <span id="credential-id" class="info-value mono">—</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="verify-site-btn" class="btn btn-primary btn-full">
+          🔐 Verify on Current Site
+        </button>
+        <button id="refresh-btn-v" class="btn btn-secondary btn-full">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Verification Result -->
+    <div id="result-view" class="view hidden">
+      <div id="result-icon" class="icon-large">🎉</div>
+      <h2 id="result-title">Access Granted!</h2>
+      <p id="result-message" class="subtitle"></p>
+      <button id="back-btn" class="btn btn-secondary btn-full">← Back</button>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-view" class="view hidden">
+      <div class="icon-large">⚠️</div>
+      <h2>Error</h2>
+      <p id="error-message" class="subtitle error-text"></p>
+      <button id="retry-btn" class="btn btn-secondary btn-full">↻ Retry</button>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
