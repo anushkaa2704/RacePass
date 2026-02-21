@@ -6,7 +6,7 @@
  * The event website NEVER sees personal data.
  */
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { verifyForThirdParty } from '../utils/api'
 
 const EVENTS = [
@@ -42,84 +42,27 @@ const EVENTS = [
   }
 ]
 
-/** 3D tilt hook for event cards */
-function useTilt(ref) {
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    function handleMove(e) {
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `perspective(800px) rotateY(${x * 15}deg) rotateX(${-y * 15}deg) translateZ(15px) scale(1.03)`
-      el.style.boxShadow = `${-x * 20}px ${y * 20}px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0, 217, 255, 0.08)`
-    }
-
-    function handleLeave() {
-      el.style.transform = ''
-      el.style.boxShadow = ''
-      el.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-    }
-
-    function handleEnter() {
-      el.style.transition = 'all 0.1s ease'
-    }
-
-    el.addEventListener('mousemove', handleMove)
-    el.addEventListener('mouseleave', handleLeave)
-    el.addEventListener('mouseenter', handleEnter)
-    return () => {
-      el.removeEventListener('mousemove', handleMove)
-      el.removeEventListener('mouseleave', handleLeave)
-      el.removeEventListener('mouseenter', handleEnter)
-    }
-  }, [ref])
-}
-
 function EventCard3D({ event, index, onClick }) {
-  const ref = useRef(null)
-  useTilt(ref)
-
   return (
     <div
-      ref={ref}
       className="card event-card"
       style={{
         width: '270px',
         textAlign: 'center',
         cursor: 'pointer',
-        animationDelay: `${0.15 * index}s`,
-        transformStyle: 'preserve-3d',
-        willChange: 'transform'
+        animationDelay: `${0.1 * index}s`
       }}
       onClick={onClick}
     >
-      <div style={{
-        fontSize: '52px', marginBottom: '10px',
-        animation: `floatY 4s ${0.5 * index}s ease-in-out infinite`,
-        transform: 'translateZ(20px)'
-      }}>{event.emoji}</div>
-      <h3 style={{
-        color: '#fff', fontSize: '18px', marginBottom: '8px',
-        transform: 'translateZ(15px)'
-      }}>{event.name}</h3>
-      <p style={{
-        color: '#94a3b8', fontSize: '13px', marginBottom: '15px',
-        transform: 'translateZ(10px)'
-      }}>{event.tagline}</p>
+      <div style={{ fontSize: '48px', marginBottom: '10px' }}>{event.emoji}</div>
+      <h3 style={{ color: '#fff', fontSize: '18px', marginBottom: '8px' }}>{event.name}</h3>
+      <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '15px' }}>{event.tagline}</p>
       <div className={`status-badge ${event.minAge > 0 ? 'status-pending' : 'status-verified'}`}
-        style={{ fontSize: '12px', transform: 'translateZ(10px)' }}>
+        style={{ fontSize: '12px' }}>
         {event.minAge > 0 ? `${event.minAge}+ Only` : 'All Ages'}
       </div>
-      <button
-        className="btn btn-primary"
-        style={{
-          width: '100%', marginTop: '15px', fontSize: '14px',
-          transform: 'translateZ(20px)'
-        }}
-      >
-        🪪 Continue with RacePass
+      <button className="btn btn-primary" style={{ width: '100%', marginTop: '15px', fontSize: '14px' }}>
+        🧪 Verify & Enter
       </button>
     </div>
   )
@@ -191,7 +134,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
         <div className="page-center" style={{ minHeight: 'calc(100vh - 300px)' }}>
           <div style={{
             display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center',
-            maxWidth: '920px', perspective: '1200px'
+            maxWidth: '920px'
           }}>
             {EVENTS.map((event, i) => (
               <EventCard3D
@@ -206,29 +149,25 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
           {/* How it works */}
           <div className="card glass-card" style={{
             maxWidth: '720px', width: '100%', marginTop: '30px',
-            animation: 'slideUp3D 0.6s 0.4s both'
+            animation: 'fadeUp 0.5s 0.2s both'
           }}>
-            <h3 style={{ color: '#00d9ff', marginBottom: '15px' }}>How Age-Gated Verification Works</h3>
+            <h3 style={{ color: '#00d9ff', marginBottom: '15px' }}>How It Works</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: '#94a3b8' }}>
               {[
-                { step: 1, bold: 'Connect wallet', text: '— MetaMask identifies you' },
-                { step: 2, bold: 'Backend checks credential', text: '— verifies RacePass + age flag' },
-                { step: 3, bold: 'Access granted or denied', text: '— only boolean "is 18+" shared, never your actual DOB' }
+                { step: 1, text: 'Connect your wallet' },
+                { step: 2, text: 'We check your RacePass credential' },
+                { step: 3, text: 'Access granted or denied instantly' }
               ].map(s => (
                 <div key={s.step} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <span style={{
                     background: 'linear-gradient(135deg, #00d9ff, #6366f1)', color: '#0a0a14',
                     borderRadius: '50%', width: '32px', height: '32px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 'bold', flexShrink: 0,
-                    boxShadow: '0 4px 12px rgba(0, 217, 255, 0.3)'
+                    fontWeight: 'bold', flexShrink: 0
                   }}>{s.step}</span>
-                  <span><strong style={{ color: '#fff' }}>{s.bold}</strong> {s.text}</span>
+                  <span>{s.text}</span>
                 </div>
               ))}
-            </div>
-            <div style={{ marginTop: '15px', color: '#00ff88', fontSize: '13px' }}>
-              ✓ The event sees: "verified: true, isAdult: true" — NOTHING else. No name, no DOB, no Aadhaar.
             </div>
           </div>
         </div>
@@ -294,7 +233,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
               )}
 
               <div className="alert alert-success">
-                🔒 No personal data was shared. The event only received: verified=true{event.minAge > 0 ? ', isAdult=true' : ''}.
+                🔒 Your identity was verified without sharing any personal data.
               </div>
 
               <button className="btn btn-secondary" onClick={handleBack} style={{ marginTop: '15px' }}>← Back to Events</button>

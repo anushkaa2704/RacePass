@@ -313,7 +313,9 @@ router.get('/credential/:address', (req, res) => {
       isAdult: data.isAdult,
       ageCategory: data.ageCategory,
       walletAddress: address,
-      expiresAt: data.expiresAt
+      expiresAt: data.expiresAt,
+      createdAt: data.createdAt,
+      blockchainResults: data.blockchainResults
     }
   })
 })

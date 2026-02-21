@@ -11,7 +11,7 @@
  * - 3D card animations, perspective transforms
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { checkVerificationStatus, revokeCredential, getActivityLog as fetchActivityLog } from '../utils/api'
 
@@ -59,33 +59,7 @@ function DashboardPage({
   const [revokeConfirm, setRevokeConfirm] = useState(false)
   const [countdown, setCountdown] = useState('')
 
-  // 3D tilt ref for status card
-  const statusRef = useRef(null)
-  useEffect(() => {
-    const el = statusRef.current
-    if (!el) return
-    function handleMove(e) {
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateZ(10px)`
-    }
-    function handleLeave() {
-      el.style.transform = ''
-      el.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-    }
-    function handleEnter() {
-      el.style.transition = 'transform 0.12s ease'
-    }
-    el.addEventListener('mousemove', handleMove)
-    el.addEventListener('mouseleave', handleLeave)
-    el.addEventListener('mouseenter', handleEnter)
-    return () => {
-      el.removeEventListener('mousemove', handleMove)
-      el.removeEventListener('mouseleave', handleLeave)
-      el.removeEventListener('mouseenter', handleEnter)
-    }
-  }, [])
+  // 3D tilt removed for performance
 
   const loadData = useCallback(async () => {
     if (!walletAddress) return
@@ -188,10 +162,7 @@ function DashboardPage({
   return (
     <div className="page-center">
       {/* ── Status Card ── */}
-      <div ref={statusRef} className="dashboard" style={{
-        transformStyle: 'preserve-3d',
-        willChange: 'transform'
-      }}>
+      <div className="dashboard">
         <div
           className="dashboard-icon glow-ring"
           style={{
@@ -205,11 +176,11 @@ function DashboardPage({
           {isLoading ? '⏳' : isVerified ? '✓' : expired ? '⏰' : '✕'}
         </div>
 
-        <h1 className="dashboard-title" style={{ transform: 'translateZ(15px)' }}>
+        <h1 className="dashboard-title">
           {isLoading ? 'Checking...' : isVerified ? 'RacePass Active' : expired ? 'RacePass Expired' : 'RacePass Not Active'}
         </h1>
 
-        <p className="dashboard-subtitle" style={{ transform: 'translateZ(10px)' }}>
+        <p className="dashboard-subtitle">
           {isLoading ? 'Checking your verification status...'
             : isVerified ? 'Your identity is verified!'
             : expired ? 'Your credential has expired. Please re-register.'
@@ -218,7 +189,7 @@ function DashboardPage({
 
         {!isLoading && (
           <div className={`status-badge ${isVerified ? 'status-verified' : expired ? 'status-pending' : 'status-not-verified'}`}
-            style={{ transform: 'translateZ(20px)' }}>
+>
             {isVerified ? '● Verified' : expired ? '⏰ Expired' : '○ Not Verified'}
           </div>
         )}

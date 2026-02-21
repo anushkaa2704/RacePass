@@ -8,13 +8,14 @@
  * - 3D animated nav, page transitions
  */
 
-import { useState, useEffect, useRef, Component } from 'react'
+import { useState, useEffect, Component } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import ConcertPage from './pages/ConcertPage'
+import ProfilePage from './pages/ProfilePage'
 
 import { connectWallet, getWalletAddress, checkIfWalletConnected } from './utils/wallet'
 
@@ -101,7 +102,7 @@ function PageTransition({ children }) {
   return (
     <div style={{
       opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0) perspective(800px) rotateX(0)' : 'translateY(30px) perspective(800px) rotateX(-3deg)',
+      transform: visible ? 'translateY(0)' : 'translateY(20px)',
       transition: 'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)'
     }}>
       {children}
@@ -191,19 +192,21 @@ function App() {
               <Link to="/dashboard" className="nav-link">Dashboard</Link>
               <Link to="/concert" className="nav-link">Events</Link>
               {isWalletConnected ? (
-                <div className="wallet-info" style={{
-                  animation: 'fadeInUp3D 0.4s ease',
+                <Link to="/profile" className="wallet-info" style={{
+                  animation: 'fadeUp 0.4s ease',
                   background: 'rgba(0, 255, 136, 0.08)',
                   border: '1px solid rgba(0, 255, 136, 0.2)',
                   borderRadius: '20px',
                   padding: '6px 14px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
+                  textDecoration: 'none',
+                  cursor: 'pointer'
                 }}>
-                  <span style={{ animation: 'stepPulse 2s infinite' }}>🟢</span>
+                  <span>🟢</span>
                   <span className="wallet-address">{shortenAddress(walletAddress)}</span>
-                </div>
+                </Link>
               ) : (
                 <button className="btn btn-primary btn-glow" onClick={handleConnectWallet} disabled={isLoading}>
                   {isLoading ? 'Connecting...' : 'Connect Wallet'}
@@ -233,6 +236,10 @@ function App() {
               <Route path="/concert" element={
                 <ConcertPage isWalletConnected={isWalletConnected} walletAddress={walletAddress}
                   onConnectWallet={handleConnectWallet} selectedNetwork={selectedNetwork} />
+              } />
+              <Route path="/profile" element={
+                <ProfilePage isWalletConnected={isWalletConnected} walletAddress={walletAddress}
+                  isVerified={isVerified} />
               } />
             </Routes>
           </PageTransition>

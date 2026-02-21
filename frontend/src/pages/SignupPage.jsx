@@ -12,7 +12,7 @@
  * - 3D card tilt, animated steps, perspective transforms
  */
 
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { submitKYC } from '../utils/api'
 import { isMetaMaskInstalled } from '../utils/wallet'
@@ -48,36 +48,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
   // Drag state for the drop zone
   const [dragging, setDragging] = useState(false)
 
-  // ── 3D tilt on form card ──
-  useEffect(() => {
-    const el = cardRef.current
-    if (!el) return
-
-    function handleMove(e) {
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `perspective(1000px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateZ(8px)`
-    }
-
-    function handleLeave() {
-      el.style.transform = 'perspective(1000px) rotateY(0) rotateX(0) translateZ(0)'
-      el.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-    }
-
-    function handleEnter() {
-      el.style.transition = 'transform 0.15s ease'
-    }
-
-    el.addEventListener('mousemove', handleMove)
-    el.addEventListener('mouseleave', handleLeave)
-    el.addEventListener('mouseenter', handleEnter)
-    return () => {
-      el.removeEventListener('mousemove', handleMove)
-      el.removeEventListener('mouseleave', handleLeave)
-      el.removeEventListener('mouseenter', handleEnter)
-    }
-  }, [currentStep, success])
+  // 3D tilt removed for performance
 
   // ── Live age calculation ──
   const age = useMemo(() => {
