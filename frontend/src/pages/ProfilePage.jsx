@@ -55,8 +55,30 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
     .map(a => ({
       eventType: a.eventType || 'general',
       timestamp: a.timestamp,
-      minAge: a.minAge
+      minAge: a.minAge,
+      userAge: a.userAge,
+      movieName: a.movieName,
+      siteName: a.siteName,
+      status: 'confirmed'
     }))
+
+  // Derive blocked (denied) attempts from activity log
+  const blockedAttempts = activities
+    .filter(a => a.action === 'AGE_GATE_BLOCKED')
+    .map(a => ({
+      eventType: a.eventType || 'general',
+      timestamp: a.timestamp,
+      minAge: a.minAge,
+      userAge: a.userAge,
+      movieName: a.movieName,
+      siteName: a.siteName,
+      message: a.message,
+      status: 'denied'
+    }))
+
+  // Combined booking history — both confirmed and denied, sorted newest first
+  const bookingHistory = [...registeredEvents, ...blockedAttempts]
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
 
   // Get blockchain tx hashes
   const txHashes = []
@@ -237,43 +259,95 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
         </div>
       )}
 
-      {/* Registered Events */}
+      {/* ══════════ Booking History ══════════ */}
       <div className="card glass-card" style={{
         maxWidth: '600px', width: '100%', marginTop: '20px',
         animation: 'fadeUp 0.4s 0.25s both'
       }}>
-        <h3 className="card-title">🎪 Registered Events</h3>
-        {registeredEvents.length === 0 ? (
+        <h3 className="card-title">🎬 Booking History</h3>
+        {bookingHistory.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: '40px', marginBottom: '10px', opacity: 0.5 }}>🎫</div>
-            <p style={{ color: '#64748b', fontSize: '14px' }}>No events yet</p>
-            <Link to="/concert" className="btn btn-primary" style={{ marginTop: '12px', fontSize: '13px' }}>
-              Browse Events
-            </Link>
+            <p style={{ color: '#64748b', fontSize: '14px' }}>No booking attempts yet</p>
+            <p style={{ color: '#475569', fontSize: '12px', marginTop: '6px' }}>
+              Visit a movie page with the RacePass extension to see your history here.
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {registeredEvents.map((evt, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '12px 14px', background: 'rgba(255,255,255,0.03)',
-                borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)'
-              }}>
-                <div>
-                  <div style={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}>
-                    {eventDisplayNames[evt.eventType] || `📌 ${evt.eventType}`}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {bookingHistory.map((item, i) => {
+              const isConfirmed = item.status === 'confirmed'
+              return (
+                <div key={i} style={{
+                  padding: '16px',
+                  background: isConfirmed
+                    ? 'rgba(0, 255, 136, 0.04)'
+                    : 'rgba(255, 107, 107, 0.04)',
+                  borderRadius: '12px',
+                  border: `1px solid ${isConfirmed
+                    ? 'rgba(0, 255, 136, 0.12)'
+                    : 'rgba(255, 107, 107, 0.12)'}`,
+                }}>
+                  {/* Header row: movie name + status badge */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#fff', fontSize: '15px', fontWeight: 600 }}>
+                        🎬 {item.movieName || item.eventType || 'Unknown'}
+                      </div>
+                      {item.siteName && (
+                        <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '3px' }}>
+                          on {item.siteName}
+                        </div>
+                      )}
+                    </div>
+                    <span style={{
+                      padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      background: isConfirmed
+                        ? 'rgba(0, 255, 136, 0.15)'
+                        : 'rgba(255, 107, 107, 0.15)',
+                      color: isConfirmed ? '#00ff88' : '#ff6b6b',
+                      border: `1px solid ${isConfirmed ? 'rgba(0,255,136,0.25)' : 'rgba(255,107,107,0.25)'}`,
+                    }}>
+                      {isConfirmed ? '✅ Booking Confirmed' : '🚫 Booking Denied'}
+                    </span>
                   </div>
-                  {evt.minAge > 0 && (
-                    <span style={{ color: '#00ff88', fontSize: '11px' }}>Age {evt.minAge}+ ✓</span>
-                  )}
+
+                  {/* Details row */}
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '8px 10px', borderRadius: '8px',
+                    background: isConfirmed
+                      ? 'rgba(0, 255, 136, 0.06)'
+                      : 'rgba(255, 107, 107, 0.06)',
+                    fontSize: '12px',
+                  }}>
+                    <div>
+                      {item.minAge > 0 ? (
+                        <span style={{ color: isConfirmed ? '#00ff88' : '#ff9999' }}>
+                          Required: <strong>{item.minAge}+</strong>
+                          {item.userAge != null && (
+                            <> &nbsp;|&nbsp; Your age: <strong>{item.userAge}</strong></>
+                          )}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#00d9ff' }}>Identity verification{isConfirmed ? ' passed' : ' required'}</span>
+                      )}
+                      {!isConfirmed && item.minAge > 0 && (
+                        <div style={{ color: '#ff6b6b', marginTop: '4px', fontSize: '11px' }}>
+                          Reason: Age {item.userAge != null ? item.userAge : '?'} does not meet the {item.minAge}+ requirement
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ color: '#64748b', fontSize: '11px', textAlign: 'right', whiteSpace: 'nowrap', marginLeft: '12px' }}>
+                      {new Date(item.timestamp).toLocaleDateString()}
+                      <br />
+                      {new Date(item.timestamp).toLocaleTimeString()}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ color: '#64748b', fontSize: '12px', textAlign: 'right' }}>
-                  {new Date(evt.timestamp).toLocaleDateString()}
-                  <br />
-                  <span style={{ fontSize: '11px' }}>{new Date(evt.timestamp).toLocaleTimeString()}</span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
@@ -302,9 +376,11 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                   }</span>
                   <span style={{ color: '#ccc' }}>
                     {a.action === 'KYC_SUBMITTED' ? 'KYC Completed' :
-                     a.action === 'THIRD_PARTY_VERIFIED' ? `Event Verified${a.eventType ? ` (${a.eventType})` : ''}` :
-                     a.action === 'AGE_GATE_BLOCKED' ? `Blocked${a.eventType ? ` (${a.eventType})` : ''}` :
-                     a.action === 'CREDENTIAL_REVOKED' ? 'Credential Revoked' :
+                     a.action === 'THIRD_PARTY_VERIFIED'
+                       ? `Verified${a.movieName ? ` — ${a.movieName}` : ''}${a.siteName ? ` on ${a.siteName}` : ''}${a.eventType && !a.movieName ? ` (${a.eventType})` : ''}`
+                       : a.action === 'AGE_GATE_BLOCKED'
+                       ? `Blocked${a.movieName ? ` — ${a.movieName}` : ''}${a.siteName ? ` on ${a.siteName}` : ''} (needs ${a.minAge}+, age ${a.userAge || '?'})`
+                       : a.action === 'CREDENTIAL_REVOKED' ? 'Credential Revoked' :
                      a.action.replace(/_/g, ' ')}
                   </span>
                 </div>

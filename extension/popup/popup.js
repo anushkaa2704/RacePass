@@ -68,7 +68,11 @@ async function checkStatus(walletAddress) {
     if (data.isVerifiedOnAny) {
       // User is verified — show verified view
       document.getElementById('wallet-address-v').textContent = shorten(walletAddress)
-      document.getElementById('age-category').textContent = data.ageCategory || (data.isAdult ? '18+' : 'Under 18')
+      // Show actual age if available, otherwise category
+      const ageDisplay = data.age != null
+        ? `${data.age} yrs (${data.ageCategory || (data.isAdult ? '18+' : 'minor')})`
+        : (data.ageCategory || (data.isAdult ? '18+' : 'Under 18'))
+      document.getElementById('age-category').textContent = ageDisplay
       document.getElementById('age-status').textContent = 'Verified'
       document.getElementById('age-status').className = 'badge badge-green'
 
@@ -154,7 +158,7 @@ document.getElementById('refresh-btn-v').addEventListener('click', async () => {
 })
 
 // ── Verify on Current Site ──
-// Sends a message to the background script which talks to the content script
+// First asks the content script what the page requires, then verifies with that minAge
 document.getElementById('verify-site-btn').addEventListener('click', async () => {
   const { walletAddress } = await chrome.storage.local.get('walletAddress')
   if (!walletAddress) return showError('No wallet connected')
@@ -162,16 +166,35 @@ document.getElementById('verify-site-btn').addEventListener('click', async () =>
   showView('loading')
 
   try {
-    // Send message to background script to verify
+    // Step 1: Ask the content script for page age info
+    let pageInfo = { minAge: 0, movieName: '', siteName: '', restricted: false }
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+      if (tab?.id) {
+        pageInfo = await chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_INFO' })
+      }
+    } catch (e) {
+      // Content script not available — proceed with minAge 0
+    }
+
+    // Step 2: Send message to background script to verify with page's minAge
     const response = await chrome.runtime.sendMessage({
       type: 'VERIFY_FOR_SITE',
-      walletAddress
+      walletAddress,
+      minAge: pageInfo.minAge || 0,
+      eventType: pageInfo.restricted ? 'movie' : 'general',
+      movieName: pageInfo.movieName || '',
+      siteName: pageInfo.siteName || ''
     })
 
     if (response.verified) {
       showResult('🎉', 'Access Granted!', 'Verification sent to the website.')
     } else if (response.reason === 'age_restricted') {
-      showResult('🚫', 'Age Restricted', response.message || 'You do not meet the age requirement.')
+      showResult(
+        '🚫',
+        'Access Denied',
+        response.message || `You must be ${pageInfo.minAge}+ to access this content.`
+      )
     } else {
       showResult('❌', 'Not Verified', response.message || 'Verification failed.')
     }

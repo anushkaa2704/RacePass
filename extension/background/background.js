@@ -55,7 +55,7 @@ async function handleMessage(message, sender) {
  * or "Verify on Current Site" in the popup
  */
 async function handleVerifyForSite(message) {
-  const { walletAddress, minAge = 0, eventType = 'general' } = message
+  const { walletAddress, minAge = 0, eventType = 'general', movieName = '', siteName = '' } = message
 
   if (!walletAddress) {
     // Try to get from storage
@@ -74,7 +74,9 @@ async function handleVerifyForSite(message) {
         walletAddress: message.walletAddress,
         network: 'ethereum',
         minAge,
-        eventType
+        eventType,
+        movieName,
+        siteName
       })
     })
 
@@ -95,11 +97,14 @@ async function handleVerifyForSite(message) {
     return {
       success: true,
       verified: data.verified,
+      walletAddress: message.walletAddress,
       reason: data.reason,
       message: data.message,
       fingerprint: data.fingerprint,
       isAdult: data.isAdult,
-      eventType: data.eventType
+      eventType: data.eventType,
+      userAge: data.userAge,
+      minAge: data.minAge
     }
   } catch (err) {
     return { success: false, verified: false, error: err.message }

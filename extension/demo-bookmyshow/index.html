@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookMyShow — Movies in Mumbai</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: #1a1a2e;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .navbar .logo span { color: #e23744; }
+    .navbar .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .navbar .nav-links a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .navbar .nav-links a:hover { color: #fff; }
+    .navbar .city-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .search-bar {
+      background: #2a2a3e;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      width: 300px;
+      font-size: 14px;
+    }
+    .search-bar::placeholder { color: #666; }
+
+    /* ── Hero Banner ── */
+    .hero-banner {
+      background: linear-gradient(135deg, #e23744 0%, #c02030 100%);
+      padding: 32px 24px;
+      text-align: center;
+      color: #fff;
+    }
+    .hero-banner h2 { font-size: 28px; font-weight: 700; }
+    .hero-banner p { opacity: 0.9; margin-top: 6px; font-size: 15px; }
+
+    /* ── Filter Bar ── */
+    .filter-bar {
+      background: #fff;
+      padding: 14px 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      overflow-x: auto;
+    }
+    .filter-chip {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover { background: #e23744; color: #fff; border-color: #e23744; }
+    .filter-chip.active { background: #e23744; color: #fff; border-color: #e23744; }
+
+    /* ── Movies Grid ── */
+    .section-title {
+      padding: 24px 24px 16px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+      padding: 0 24px 40px;
+    }
+    .movie-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .movie-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .movie-poster {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      background: #ddd;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    .movie-poster .age-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .age-badge.ua { background: #2ecc71; color: #fff; }
+    .age-badge.a { background: #e23744; color: #fff; }
+    .age-badge.u { background: #3498db; color: #fff; }
+    .movie-info {
+      padding: 14px;
+    }
+    .movie-info h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .movie-info .genre {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .movie-info .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .movie-info .rating .star { color: #e23744; }
+    .movie-info .rating span { color: #555; }
+
+    /* ── Booking Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #1a1a2e, #2d2d44);
+      padding: 24px;
+      color: #fff;
+    }
+    .modal-header h2 { font-size: 22px; font-weight: 700; }
+    .modal-header .movie-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .modal-header .age-warning {
+      background: #e23744;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Showtime Selector ── */
+    .showtime-section h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    .cinema-row {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .cinema-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .showtimes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .showtime-btn {
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2ecc71;
+      transition: all 0.2s;
+    }
+    .showtime-btn:hover {
+      border-color: #2ecc71;
+      background: #f0fff5;
+    }
+    .showtime-btn.selected {
+      border-color: #e23744;
+      background: #fff0f1;
+      color: #e23744;
+    }
+
+    /* ── Seat Count ── */
+    .seat-section {
+      margin-top: 20px;
+    }
+    .seat-section h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .seat-counter {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .seat-counter button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      background: #f5f5f5;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .seat-counter button:hover { background: #eee; }
+    .seat-counter .count {
+      font-size: 24px;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* ── Age Gate ── */
+    .age-gate {
+      background: #fff8f0;
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .age-gate .lock-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    .age-gate h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e23744;
+      margin-bottom: 6px;
+    }
+    .age-gate p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    /* ── RacePass integration point ── */
+    .racepass-gate {
+      margin-top: 12px;
+    }
+
+    /* ── Book Button ── */
+    .book-btn {
+      width: 100%;
+      padding: 14px;
+      background: #e23744;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s;
+    }
+    .book-btn:hover { background: #c02030; }
+    .book-btn:disabled {
+      background: #ccc;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* ── Success Ticket ── */
+    .ticket-success {
+      display: none;
+      text-align: center;
+      padding: 30px 24px;
+    }
+    .ticket-success.show { display: block; }
+    .ticket-success .check {
+      width: 70px;
+      height: 70px;
+      background: #2ecc71;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 16px;
+      color: #fff;
+    }
+    .ticket-success h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2ecc71;
+    }
+    .ticket-success p { color: #666; margin-top: 6px; font-size: 14px; }
+    .ticket-details {
+      background: #f8f8f8;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+      text-align: left;
+    }
+    .ticket-details .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    .ticket-details .row .label { color: #888; }
+    .ticket-details .row .value { font-weight: 600; }
+
+    /* ── Blocked Message ── */
+    .blocked-msg {
+      display: none;
+      text-align: center;
+      padding: 30px 24px;
+    }
+    .blocked-msg.show { display: block; }
+    .blocked-msg .icon { font-size: 48px; margin-bottom: 12px; }
+    .blocked-msg h2 { font-size: 20px; color: #e23744; }
+    .blocked-msg p { color: #666; margin-top: 8px; font-size: 14px; }
+
+    /* ── Footer ── */
+    .footer {
+      background: #1a1a2e;
+      color: #666;
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">🎬 <span>Book</span>MyShow</div>
+    <input class="search-bar" placeholder="Search for Movies, Events, Plays..." />
+    <div class="nav-links">
+      <a href="#">Movies</a>
+      <a href="#">Events</a>
+      <a href="#">Plays</a>
+      <button class="city-btn">📍 Mumbai</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero-banner">
+    <h2>🎬 Now Showing in Mumbai</h2>
+    <p>Book tickets for the latest blockbusters</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-chip active">All Languages</div>
+    <div class="filter-chip">Hindi</div>
+    <div class="filter-chip">English</div>
+    <div class="filter-chip">Tamil</div>
+    <div class="filter-chip">Action</div>
+    <div class="filter-chip">Thriller</div>
+    <div class="filter-chip">Comedy</div>
+    <div class="filter-chip">Drama</div>
+  </div>
+
+  <!-- Movies Grid -->
+  <h2 class="section-title">Recommended Movies</h2>
+  <div class="movies-grid" id="movies-grid">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" id="modal-close">×</button>
+
+      <!-- Booking Form -->
+      <div id="booking-form">
+        <div class="modal-header">
+          <h2 id="modal-title"></h2>
+          <div class="movie-meta">
+            <span id="modal-genre"></span>
+            <span>•</span>
+            <span id="modal-duration"></span>
+            <span>•</span>
+            <span id="modal-lang"></span>
+          </div>
+          <div class="age-warning" id="age-warning" style="display:none">
+            ⚠️ <span id="age-warning-text"></span>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <!-- Showtimes -->
+          <div class="showtime-section">
+            <h3>📅 Select Showtime — Today</h3>
+            <div class="cinema-row">
+              <div class="cinema-name">PVR ICON: Infinity Mall, Andheri</div>
+              <div class="showtimes">
+                <button class="showtime-btn" data-time="10:30 AM" onclick="selectTime(this)">10:30 AM</button>
+                <button class="showtime-btn" data-time="1:45 PM" onclick="selectTime(this)">1:45 PM</button>
+                <button class="showtime-btn" data-time="4:30 PM" onclick="selectTime(this)">4:30 PM</button>
+                <button class="showtime-btn" data-time="9:15 PM" onclick="selectTime(this)">9:15 PM</button>
+              </div>
+            </div>
+            <div class="cinema-row">
+              <div class="cinema-name">INOX: R-City Mall, Ghatkopar</div>
+              <div class="showtimes">
+                <button class="showtime-btn" data-time="11:00 AM" onclick="selectTime(this)">11:00 AM</button>
+                <button class="showtime-btn" data-time="2:30 PM" onclick="selectTime(this)">2:30 PM</button>
+                <button class="showtime-btn" data-time="7:00 PM" onclick="selectTime(this)">7:00 PM</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seats -->
+          <div class="seat-section">
+            <h3>💺 Number of Seats</h3>
+            <div class="seat-counter">
+              <button onclick="changeSeat(-1)">−</button>
+              <div class="count" id="seat-count">2</div>
+              <button onclick="changeSeat(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Age Gate — shows only for 18+ movies -->
+          <div class="age-gate" id="age-gate" style="display:none">
+            <div class="lock-icon">🔒</div>
+            <h3>Age Verification Required</h3>
+            <p>This movie is rated <strong>A (Adults Only)</strong>. You must be 18+ to book tickets.<br>Verify your age instantly with RacePass — no documents shared.</p>
+
+            <!-- RacePass integration point -->
+            <div class="racepass-gate"
+                 data-racepass="true"
+                 data-min-age="18"
+                 data-event-type="movie">
+            </div>
+          </div>
+
+          <!-- Book Button -->
+          <button class="book-btn" id="book-btn" onclick="bookTicket()">
+            Book Tickets — ₹320 × 2
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Ticket -->
+      <div class="ticket-success" id="ticket-success">
+        <div class="check">✓</div>
+        <h2>Booking Confirmed! 🎉</h2>
+        <p>Your e-ticket has been sent to your email</p>
+        <div class="ticket-details">
+          <div class="row"><span class="label">Movie</span><span class="value" id="ticket-movie"></span></div>
+          <div class="row"><span class="label">Cinema</span><span class="value">PVR ICON, Andheri</span></div>
+          <div class="row"><span class="label">Showtime</span><span class="value" id="ticket-time"></span></div>
+          <div class="row"><span class="label">Seats</span><span class="value" id="ticket-seats"></span></div>
+          <div class="row"><span class="label">Total</span><span class="value" id="ticket-total"></span></div>
+          <div class="row"><span class="label">Age Verified</span><span class="value" id="ticket-verified" style="color:#2ecc71">✅ RacePass</span></div>
+          <div class="row"><span class="label">Booking ID</span><span class="value" id="ticket-id"></span></div>
+        </div>
+      </div>
+
+      <!-- Blocked -->
+      <div class="blocked-msg" id="blocked-msg">
+        <div class="icon">🚫</div>
+        <h2>Booking Blocked</h2>
+        <p>Age verification failed. You must be 18+ to watch this movie.<br>Complete your KYC on RacePass to verify your age.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    ⚠️ This is a DEMO site for RacePass Chrome Extension testing.<br>
+    Not affiliated with BookMyShow. Built for hackathon demonstration only.
+  </div>
+
+  <script>
+    // ── Movie Data ──
+    const movies = [
+      {
+        title: 'Singham Again',
+        genre: 'Action/Drama',
+        duration: '2h 24m',
+        lang: 'Hindi',
+        rating: 7.2,
+        ageRating: 'UA 13+',
+        emoji: '🦁',
+        color: '#ff9800',
+        price: 280,
+        isAdultOnly: false
+      },
+      {
+        title: 'Jigra',
+        genre: 'Action/Thriller',
+        duration: '2h 33m',
+        lang: 'Hindi',
+        rating: 6.8,
+        ageRating: 'UA 16+',
+        emoji: '⚔️',
+        color: '#9c27b0',
+        price: 300,
+        isAdultOnly: false
+      },
+      {
+        title: 'Kill',
+        genre: 'Action/Thriller',
+        duration: '1h 45m',
+        lang: 'Hindi',
+        rating: 8.1,
+        ageRating: 'A',
+        emoji: '🔪',
+        color: '#e23744',
+        price: 320,
+        isAdultOnly: true
+      },
+      {
+        title: 'Animal',
+        genre: 'Crime/Drama',
+        duration: '3h 21m',
+        lang: 'Hindi',
+        rating: 6.5,
+        ageRating: 'A',
+        emoji: '🐾',
+        color: '#c62828',
+        price: 350,
+        isAdultOnly: true
+      },
+      {
+        title: 'Stree 2',
+        genre: 'Comedy/Horror',
+        duration: '2h 30m',
+        lang: 'Hindi',
+        rating: 7.8,
+        ageRating: 'UA 13+',
+        emoji: '👻',
+        color: '#7b1fa2',
+        price: 260,
+        isAdultOnly: false
+      },
+      {
+        title: 'Deadpool & Wolverine',
+        genre: 'Action/Comedy',
+        duration: '2h 8m',
+        lang: 'English',
+        rating: 8.0,
+        ageRating: 'A',
+        emoji: '🦸',
+        color: '#d32f2f',
+        price: 350,
+        isAdultOnly: true
+      },
+      {
+        title: 'Bhool Bhulaiyaa 3',
+        genre: 'Comedy/Horror',
+        duration: '2h 38m',
+        lang: 'Hindi',
+        rating: 5.9,
+        ageRating: 'UA 13+',
+        emoji: '💀',
+        color: '#ff6f00',
+        price: 280,
+        isAdultOnly: false
+      },
+      {
+        title: 'Section 84',
+        genre: 'Psychological/Thriller',
+        duration: '2h 15m',
+        lang: 'Hindi',
+        rating: 7.4,
+        ageRating: 'A',
+        emoji: '🧠',
+        color: '#1a1a2e',
+        price: 300,
+        isAdultOnly: true
+      }
+    ]
+
+    let currentMovie = null
+    let selectedTime = null
+    let seatCount = 2
+    let ageVerified = false
+
+    // ── Render Movies ──
+    const grid = document.getElementById('movies-grid')
+    movies.forEach((movie, i) => {
+      const card = document.createElement('div')
+      card.className = 'movie-card'
+      card.onclick = () => openBooking(i)
+      card.innerHTML = `
+        <div class="movie-poster" style="background:linear-gradient(135deg, ${movie.color}30, ${movie.color}10)">
+          <span>${movie.emoji}</span>
+          <span class="age-badge ${movie.ageRating === 'A' ? 'a' : movie.ageRating.startsWith('UA') ? 'ua' : 'u'}">
+            ${movie.ageRating}
+          </span>
+        </div>
+        <div class="movie-info">
+          <h3>${movie.title}</h3>
+          <div class="genre">${movie.genre} • ${movie.lang}</div>
+          <div class="rating">
+            <span class="star">★</span>
+            <span>${movie.rating}/10</span>
+          </div>
+        </div>
+      `
+      grid.appendChild(card)
+    })
+
+    // ── Open Booking Modal ──
+    function openBooking(idx) {
+      currentMovie = movies[idx]
+      selectedTime = null
+      ageVerified = false
+      seatCount = 2
+
+      document.getElementById('modal-title').textContent = currentMovie.title
+      document.getElementById('modal-genre').textContent = currentMovie.genre
+      document.getElementById('modal-duration').textContent = currentMovie.duration
+      document.getElementById('modal-lang').textContent = currentMovie.lang
+      document.getElementById('seat-count').textContent = seatCount
+
+      // Age warning — show for ALL movies
+      const ageWarn = document.getElementById('age-warning')
+      const ageGate = document.getElementById('age-gate')
+      const bookBtn = document.getElementById('book-btn')
+
+      // Derive minAge from rating string
+      let ratingMinAge = 0
+      let ratingText = currentMovie.ageRating
+      if (ratingText === 'A') ratingMinAge = 18
+      else if (ratingText.includes('16')) ratingMinAge = 16
+      else if (ratingText.includes('13')) ratingMinAge = 13
+
+      ageWarn.style.display = 'flex'
+      document.getElementById('age-warning-text').textContent =
+        ratingMinAge > 0
+          ? `Rated ${ratingText} — RacePass will verify your age (${ratingMinAge}+) when booking`
+          : `Rated ${ratingText} — RacePass will verify your identity when booking`
+      ageGate.style.display = 'none'
+      bookBtn.disabled = false
+      bookBtn.textContent = `Book Tickets — ₹${currentMovie.price} × ${seatCount}`
+
+      // Reset views
+      document.getElementById('booking-form').style.display = 'block'
+      document.getElementById('ticket-success').classList.remove('show')
+      document.getElementById('blocked-msg').classList.remove('show')
+
+      // Reset showtime buttons
+      document.querySelectorAll('.showtime-btn').forEach(b => b.classList.remove('selected'))
+
+      // Show modal
+      document.getElementById('modal-overlay').classList.add('show')
+    }
+
+    // ── Close Modal ──
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('modal-overlay').classList.remove('show')
+    })
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('modal-overlay').classList.remove('show')
+      }
+    })
+
+    // ── Select Showtime ──
+    function selectTime(btn) {
+      document.querySelectorAll('.showtime-btn').forEach(b => b.classList.remove('selected'))
+      btn.classList.add('selected')
+      selectedTime = btn.dataset.time
+    }
+
+    // ── Seat Counter ──
+    function changeSeat(delta) {
+      seatCount = Math.max(1, Math.min(10, seatCount + delta))
+      document.getElementById('seat-count').textContent = seatCount
+      updateBookBtn()
+    }
+
+    function updateBookBtn() {
+      const bookBtn = document.getElementById('book-btn')
+      bookBtn.textContent = `Book Tickets — ₹${currentMovie.price} × ${seatCount}`
+    }
+
+    // ── Book Ticket ──
+    function bookTicket() {
+      if (!selectedTime) {
+        alert('Please select a showtime first!')
+        return
+      }
+
+      // Show success ticket
+      document.getElementById('booking-form').style.display = 'none'
+      document.getElementById('ticket-success').classList.add('show')
+      document.getElementById('ticket-movie').textContent = currentMovie.title
+      document.getElementById('ticket-time').textContent = selectedTime
+      document.getElementById('ticket-seats').textContent = `${seatCount} seats`
+      document.getElementById('ticket-total').textContent = `₹${currentMovie.price * seatCount}`
+      document.getElementById('ticket-id').textContent = 'BMS-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+
+      if (currentMovie.isAdultOnly) {
+        document.getElementById('ticket-verified').innerHTML = '✅ Verified via RacePass'
+      } else {
+        document.getElementById('ticket-verified').textContent = 'Not required'
+      }
+    }
+
+    // ── Listen for RacePass Verification ──
+    // The Chrome extension content script dispatches this event when verification succeeds
+    window.addEventListener('racepass:verified', function(e) {
+      console.log('🎉 RacePass verification received:', e.detail)
+
+      if (e.detail.verified) {
+        ageVerified = true
+
+        // Unlock the book button
+        const bookBtn = document.getElementById('book-btn')
+        bookBtn.disabled = false
+        bookBtn.textContent = `Book Tickets — ₹${currentMovie.price} × ${seatCount}`
+
+        // Update the age gate
+        const ageGate = document.getElementById('age-gate')
+        ageGate.style.display = 'block'
+        ageGate.style.borderColor = '#2ecc71'
+        ageGate.style.background = '#f0fff5'
+        ageGate.innerHTML = `
+          <div class="lock-icon">✅</div>
+          <h3 style="color:#2ecc71">Age Verified!</h3>
+          <p style="color:#555">Your identity has been verified via RacePass. You can now book tickets.<br>
+          <small style="color:#888">Wallet: ${e.detail.walletAddress || 'Connected'}</small></p>
+        `
+      }
+    })
+
+    // Also listen for postMessage (backup method)
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.source === 'racepass-extension' && e.data.verified) {
+        window.dispatchEvent(new CustomEvent('racepass:verified', {
+          detail: { verified: true, walletAddress: e.data.walletAddress }
+        }))
+      }
+    })
+
+    // ── Filter chips ──
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'))
+        chip.classList.add('active')
+      })
+    })
+  </script>
+</body>
+</html>

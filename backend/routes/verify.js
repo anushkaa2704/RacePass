@@ -43,6 +43,7 @@ router.get('/:address', async (req, res) => {
         expiresAt: data.expiresAt,
         isAdult: data.isAdult,
         ageCategory: data.ageCategory,
+        age: data.age,
         source: 'local'
       })
     }

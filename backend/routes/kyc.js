@@ -157,6 +157,7 @@ router.post('/submit', async (req, res) => {
       credential: signedCredential,
       fingerprint,
       isAdult,
+      age,
       ageCategory: age >= 21 ? '21+' : age >= 18 ? '18+' : 'minor',
       blockchainResults,
       createdAt: new Date().toISOString(),

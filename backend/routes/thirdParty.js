@@ -60,19 +60,19 @@ router.post('/verify', async (req, res) => {
       })
     }
 
-    // Age gate check
-    const meetsAgeReq = minAge === 0 || (minAge <= 18 && data.isAdult) ||
-      (minAge <= 21 && (data.ageCategory === '21+')) ||
-      (minAge <= 18)
-
-    // Simpler age gate logic:
+    // Age gate check — use actual stored age for precise comparison
+    const userAge = data.age != null ? data.age : (data.isAdult ? 18 : 0)
     let ageOk = true
-    if (minAge >= 21) ageOk = data.ageCategory === '21+'
-    else if (minAge >= 18) ageOk = data.isAdult === true
+    if (minAge > 0) {
+      ageOk = userAge >= minAge
+    }
+
+    // Extract optional context from request
+    const { movieName, siteName } = req.body
 
     if (!ageOk) {
-      console.log(`   Result: 🚫 AGE RESTRICTED (needs ${minAge}+)`)
-      // Log the attempt
+      console.log(`   Result: 🚫 AGE RESTRICTED (user age ${userAge}, needs ${minAge}+)`)
+      // Log the blocked attempt with details
       const logMap = getActivityLog()
       const key = walletAddress.toLowerCase()
       if (!logMap.has(key)) logMap.set(key, [])
@@ -80,7 +80,11 @@ router.post('/verify', async (req, res) => {
         action: 'AGE_GATE_BLOCKED',
         timestamp: new Date().toISOString(),
         eventType,
-        minAge
+        minAge,
+        userAge,
+        movieName: movieName || null,
+        siteName: siteName || null,
+        message: `Attempted to access ${movieName || eventType} on ${siteName || 'unknown site'} — requires age ${minAge}+, user is ${userAge}`
       })
 
       return res.json({
@@ -88,21 +92,27 @@ router.post('/verify', async (req, res) => {
         verified: false,
         walletAddress,
         reason: 'age_restricted',
-        message: `You must be ${minAge}+ to access this event. Your RacePass indicates you do not meet the age requirement.`,
+        message: `You must be ${minAge}+ to access this content. Your age (${userAge}) does not meet the requirement.`,
+        userAge,
+        minAge,
         checkedAt: new Date().toISOString()
       })
     }
 
     // All good!
-    console.log('   Result: ✅ VERIFIED')
-    // Log successful verification
+    console.log(`   Result: ✅ VERIFIED (age ${userAge} >= ${minAge}+)`)
+    // Log successful verification with details
     const logMap = getActivityLog()
     const key = walletAddress.toLowerCase()
     if (!logMap.has(key)) logMap.set(key, [])
     logMap.get(key).push({
       action: 'THIRD_PARTY_VERIFIED',
       timestamp: new Date().toISOString(),
-      eventType
+      eventType,
+      minAge,
+      userAge,
+      movieName: movieName || null,
+      siteName: siteName || null
     })
 
     return res.json({

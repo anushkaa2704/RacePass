@@ -1,5 +1,9 @@
-/* ── RacePass Content Script Styles ── */
-/* Injected into third-party websites */
+/* ══════════════════════════════════════════════
+   RacePass Content Script Styles
+   Injected into third-party websites
+   ══════════════════════════════════════════════ */
+
+/* ── Mode 1: Explicit integration button ── */
 
 .racepass-container-injected {
   margin: 16px 0;
@@ -39,17 +43,14 @@
   transition: all 0.2s ease;
   font-family: inherit;
 }
-
 .racepass-btn-injected:hover {
   border-color: #00d9ff;
   box-shadow: 0 0 20px rgba(0, 217, 255, 0.15);
   transform: translateY(-1px);
 }
-
 .racepass-btn-injected:active {
   transform: translateY(0);
 }
-
 .racepass-btn-injected:disabled {
   opacity: 0.7;
   cursor: wait;
@@ -60,7 +61,6 @@
   background: linear-gradient(135deg, #0a1a10, #0a2a15) !important;
   color: #00ff88 !important;
 }
-
 .racepass-btn-error {
   border-color: #ff5252 !important;
   background: linear-gradient(135deg, #1a0a0a, #2a0a0a) !important;
@@ -75,7 +75,184 @@
   border-radius: 50%;
   animation: racepass-spin 0.8s linear infinite;
 }
-
 @keyframes racepass-spin {
   to { transform: rotate(360deg); }
+}
+
+
+/* ══════════════════════════════════════════════
+   FULL-PAGE BLOCKER OVERLAY
+   Used on BookMyShow & any age-restricted site
+   ══════════════════════════════════════════════ */
+
+.racepass-blocker-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important; /* highest possible z-index */
+  background: rgba(5, 5, 15, 0.97) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  animation: racepass-blockerFadeIn 0.3s ease !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+@keyframes racepass-blockerFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.racepass-blocker-overlay.racepass-blocker-fadeout {
+  opacity: 0 !important;
+  transition: opacity 0.4s ease !important;
+}
+
+/* ── Blocker card ── */
+.racepass-blocker-card {
+  background: linear-gradient(145deg, #0f0f1e, #161630) !important;
+  border: 1px solid rgba(0, 217, 255, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 44px 40px !important;
+  max-width: 480px !important;
+  width: 100% !important;
+  text-align: center !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(0, 217, 255, 0.05) !important;
+  animation: racepass-cardSlideUp 0.4s ease !important;
+}
+
+@keyframes racepass-cardSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.racepass-blocker-icon {
+  font-size: 56px !important;
+  margin-bottom: 16px !important;
+  line-height: 1 !important;
+}
+
+.racepass-blocker-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin: 0 0 10px !important;
+  letter-spacing: -0.3px !important;
+}
+
+.racepass-blocker-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 15px !important;
+  color: #e23744 !important;
+  margin: 0 0 20px !important;
+  line-height: 1.5 !important;
+}
+.racepass-blocker-subtitle strong {
+  color: #ff4d5e !important;
+}
+
+.racepass-blocker-divider {
+  width: 60px !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.4), transparent) !important;
+  margin: 0 auto 20px !important;
+}
+
+.racepass-blocker-desc {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  color: #8888aa !important;
+  margin: 0 0 28px !important;
+  line-height: 1.6 !important;
+}
+.racepass-blocker-desc strong {
+  color: #00d9ff !important;
+}
+
+/* ── Verify button inside blocker ── */
+.racepass-blocker-verify-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 16px 24px !important;
+  background: linear-gradient(135deg, #00b8d4, #00d9ff) !important;
+  color: #0a0a14 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  margin-bottom: 12px !important;
+}
+.racepass-blocker-verify-btn:hover {
+  background: linear-gradient(135deg, #00d9ff, #00f0ff) !important;
+  box-shadow: 0 6px 30px rgba(0, 217, 255, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+.racepass-blocker-verify-btn:active {
+  transform: translateY(0) !important;
+}
+.racepass-blocker-verify-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: wait !important;
+  transform: none !important;
+}
+
+.racepass-blocker-verify-btn .racepass-spinner-injected {
+  border-color: rgba(10, 10, 20, 0.2) !important;
+  border-top-color: #0a0a14 !important;
+}
+
+.racepass-blocker-btn-success {
+  background: linear-gradient(135deg, #00c853, #00e676) !important;
+  color: #fff !important;
+}
+.racepass-blocker-btn-error {
+  background: linear-gradient(135deg, #c62828, #e53935) !important;
+  color: #fff !important;
+}
+
+/* ── Go Back button ── */
+.racepass-blocker-back-btn {
+  display: block !important;
+  width: 100% !important;
+  padding: 12px !important;
+  background: transparent !important;
+  color: #666688 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+.racepass-blocker-back-btn:hover {
+  color: #aaa !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* ── Footer badges ── */
+.racepass-blocker-footer {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  margin-top: 24px !important;
+  flex-wrap: wrap !important;
+}
+.racepass-blocker-badge {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 11px !important;
+  color: #555577 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 20px !important;
+  padding: 4px 10px !important;
+  white-space: nowrap !important;
 }
