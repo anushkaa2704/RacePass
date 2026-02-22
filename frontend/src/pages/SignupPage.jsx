@@ -62,6 +62,36 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
   const [faceMatchError, setFaceMatchError] = useState('')
   const [modelsReady, setModelsReady] = useState(false)
 
+  // Face match attempt limiter (3 mismatches → 24hr lockout)
+  const [faceLocked, setFaceLocked] = useState(false)
+  const [lockRemainingTime, setLockRemainingTime] = useState('')
+
+  // Check lockout on mount and periodically
+  useEffect(() => {
+    function checkLock() {
+      const raw = localStorage.getItem('racepass_face_lock')
+      if (!raw) { setFaceLocked(false); return }
+      const data = JSON.parse(raw)
+      const elapsed = Date.now() - data.timestamp
+      const twentyFourHrs = 24 * 60 * 60 * 1000
+      if (elapsed >= twentyFourHrs) {
+        localStorage.removeItem('racepass_face_lock')
+        localStorage.removeItem('racepass_face_attempts')
+        setFaceLocked(false)
+        return
+      }
+      setFaceLocked(true)
+      setFaceMatchStatus('locked')
+      const remaining = twentyFourHrs - elapsed
+      const hrs = Math.floor(remaining / (60 * 60 * 1000))
+      const mins = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000))
+      setLockRemainingTime(`${hrs}h ${mins}m`)
+    }
+    checkLock()
+    const interval = setInterval(checkLock, 30000) // refresh every 30s
+    return () => clearInterval(interval)
+  }, [])
+
   // 3D tilt removed for performance
 
   // ── Camera Effect ──
@@ -121,6 +151,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
   }
 
   const retakePhoto = () => {
+    if (faceLocked) return
     setLivePhoto(null)
     setFaceMatchStatus(null)
     setFaceMatchScore(null)
@@ -135,7 +166,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
 
   // ── Auto-compare faces when both images ready ──
   useEffect(() => {
-    if (!livePhoto || !imageFile || !modelsReady) return
+    if (!livePhoto || !imageFile || !modelsReady || faceLocked) return
     let cancelled = false
 
     async function runFaceMatch() {
@@ -146,9 +177,27 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         const result = await compareFaces(livePhoto, imageFile)
         if (cancelled) return
         setFaceMatchScore(result.score)
-        setFaceMatchStatus(result.match ? 'match' : 'mismatch')
-        if (!result.match) {
-          setFaceMatchError(`Face mismatch (${result.score}% similarity). The selfie does not match the Aadhaar photo.`)
+        if (result.match) {
+          setFaceMatchStatus('match')
+          // Reset attempts on success
+          localStorage.removeItem('racepass_face_attempts')
+        } else {
+          // Increment failed attempts
+          const prev = parseInt(localStorage.getItem('racepass_face_attempts') || '0', 10)
+          const attempts = prev + 1
+          localStorage.setItem('racepass_face_attempts', String(attempts))
+
+          if (attempts >= 3) {
+            // Lock out for 24 hours
+            localStorage.setItem('racepass_face_lock', JSON.stringify({ timestamp: Date.now() }))
+            setFaceLocked(true)
+            setLockRemainingTime('24h 0m')
+            setFaceMatchStatus('locked')
+            setFaceMatchError('Too many failed attempts. Please try again after 24 hours.')
+          } else {
+            setFaceMatchStatus('mismatch')
+            setFaceMatchError(`Face mismatch (${result.score}% similarity). ${3 - attempts} attempt${3 - attempts === 1 ? '' : 's'} remaining.`)
+          }
         }
       } catch (err) {
         if (cancelled) return
@@ -159,7 +208,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
 
     runFaceMatch()
     return () => { cancelled = true }
-  }, [livePhoto, imageFile, modelsReady])
+  }, [livePhoto, imageFile, modelsReady, faceLocked])
 
   // ── Live age calculation ──
   const age = useMemo(() => {
@@ -265,6 +314,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
       if (!imageFile) throw new Error('Please upload your Aadhaar card image')
       if (isAadhaar === false) throw new Error('Please upload a valid Aadhaar card image')
       if (!livePhoto) throw new Error('Please capture a live photo for authentication')
+      if (faceLocked || faceMatchStatus === 'locked') throw new Error('Face verification is locked due to too many failed attempts. Try again after 24 hours.')
       if (faceMatchStatus === 'mismatch') throw new Error('Face verification failed — your selfie does not match the Aadhaar photo')
       if (faceMatchStatus === 'error') throw new Error('Face verification could not be completed. Please retake your photo.')
       if (faceMatchStatus === 'loading') throw new Error('Face verification is still in progress. Please wait.')
@@ -455,7 +505,23 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 2. Live Photo Verification <span style={{ color: '#ff5252' }}>*</span>
               </label>
 
-              {!livePhoto ? (
+              {faceLocked ? (
+                <div style={{
+                  padding: '24px', borderRadius: '16px', textAlign: 'center',
+                  background: 'rgba(255, 82, 82, 0.06)', border: '2px dashed rgba(255, 82, 82, 0.3)'
+                }}>
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '10px' }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <div style={{ color: '#ff5252', fontWeight: 700, fontSize: '15px', marginBottom: '6px' }}>Camera Locked</div>
+                  <div style={{ color: '#94a3b8', fontSize: '13px' }}>
+                    Too many failed face verification attempts.
+                  </div>
+                  <div style={{ color: '#f87171', fontSize: '13px', marginTop: '6px', fontWeight: 600 }}>
+                    Try again in {lockRemainingTime}
+                  </div>
+                </div>
+              ) : !livePhoto ? (
                 <div className="camera-container" style={{ position: 'relative', minHeight: isCameraOpen ? 'auto' : '150px' }}>
                   {isCameraOpen ? (
                     <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '2px solid #00ff88', animation: 'fadeIn 0.5s' }}>
@@ -514,7 +580,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
             </div>
 
             {/* ── Face Match Status ── */}
-            {livePhoto && imageFile && (
+            {(livePhoto && imageFile) || faceLocked ? (
               <div style={{ marginTop: '24px', marginBottom: '8px', animation: 'fadeIn 0.4s' }}>
                 <label className="form-label" style={{ marginBottom: '10px' }}>
                   3. Face Verification
@@ -561,7 +627,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                     <div>
                       <div style={{ color: '#ff5252', fontSize: '14px', fontWeight: 700 }}>Face Mismatch ✗</div>
                       <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
-                        {faceMatchScore}% similarity — The selfie does not match the Aadhaar photo. Please retake your selfie or re-upload the Aadhaar.
+                        {faceMatchError}
                       </div>
                     </div>
                   </div>
@@ -584,8 +650,29 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                     </div>
                   </div>
                 )}
+                {faceMatchStatus === 'locked' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '16px 18px', borderRadius: '12px',
+                    background: 'rgba(255, 82, 82, 0.1)', border: '1px solid rgba(255, 82, 82, 0.4)'
+                  }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <div>
+                      <div style={{ color: '#ff5252', fontSize: '15px', fontWeight: 700 }}>Verification Locked</div>
+                      <div style={{ color: '#f87171', fontSize: '13px', marginTop: '4px', fontWeight: 500 }}>
+                        3 failed face match attempts detected.
+                      </div>
+                      <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px' }}>
+                        Please try again after <strong style={{ color: '#ff5252' }}>{lockRemainingTime}</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            ) : null}
 
             <div className="form-divider">
               <span>Extracted Details</span>
@@ -625,16 +712,16 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 onChange={handleInputChange}
                 max={new Date().toISOString().split('T')[0]}
                 required
-                readOnly={ocrDone}
-                style={ocrDone ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+                readOnly={false} /* TODO: revert to {ocrDone} after testing */
+                style={{}}
               />
               {isInvalidAge && (
                 <div style={{ marginTop: '8px', fontSize: '13px', color: '#ff5252' }}>Invalid date of birth</div>
               )}
               {ocrDone && formData.dateOfBirth && (
-                <div style={{ marginTop: '4px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                  Locked — extracted from Aadhaar
+                <div style={{ marginTop: '4px', fontSize: '11px', color: '#ffc107', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffc107" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  Editable — testing mode
                 </div>
               )}
             </div>
@@ -673,7 +760,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               type="submit"
               className="btn btn-primary btn-glow"
               style={{ width: '100%', padding: '14px', fontSize: '16px', marginTop: '8px' }}
-              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false || !livePhoto || !imageFile || faceMatchStatus !== 'match'}
+              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false || !livePhoto || !imageFile || faceMatchStatus !== 'match' || faceLocked}
             >
               {isLoading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

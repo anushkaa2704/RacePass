@@ -149,6 +149,9 @@ function DashboardPage({
       await revokeCredential(walletAddress)
       setIsVerified(false)
       setRevokeConfirm(false)
+      // Clear face-match lockout so user can redo KYC fresh
+      localStorage.removeItem('racepass_face_lock')
+      localStorage.removeItem('racepass_face_attempts')
       await loadData()
     } catch (err) {
       setError(err.message)
