@@ -213,19 +213,25 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
         maxWidth: '600px', width: '100%', marginTop: '20px',
         animation: 'fadeUp 0.4s 0.25s both'
       }}>
-        <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>Booking History</h3>
+        <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>Verification History</h3>
         {bookingHistory.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ marginBottom: '10px' }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12l5 5L22 2"/><rect x="1" y="3" width="15" height="18" rx="2"/></svg></div>
-            <p style={{ color: '#64748b', fontSize: '14px' }}>No booking attempts yet</p>
+            <p style={{ color: '#64748b', fontSize: '14px' }}>No verification attempts yet</p>
             <p style={{ color: '#475569', fontSize: '12px', marginTop: '6px' }}>
-              Visit events to see your history here.
+              Visit BookMyShow or Paytm to see your history here.
             </p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {bookingHistory.map((item, i) => {
               const isConfirmed = item.status === 'confirmed'
+              const isFinance = item.eventType === 'finance' || (item.siteName && item.siteName.toLowerCase().includes('paytm'))
+              const confirmLabel = isFinance ? 'Access Granted' : 'Booking Confirmed'
+              const denyLabel = isFinance ? 'Access Denied' : 'Booking Denied'
+              const siteIcon = isFinance
+                ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00baf2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e23744" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>
               return (
                 <div key={i} style={{
                   padding: '16px',
@@ -237,14 +243,15 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                     ? 'rgba(0, 255, 136, 0.12)'
                     : 'rgba(255, 107, 107, 0.12)'}`,
                 }}>
-                  {/* Header row: movie name + status badge */}
+                  {/* Header row: name + status badge */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ color: '#fff', fontSize: '15px', fontWeight: 600 }}>
+                      <div style={{ color: '#fff', fontSize: '15px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {siteIcon}
                         {item.movieName || item.eventType || 'Unknown'}
                       </div>
                       {item.siteName && (
-                        <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '3px' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '3px', paddingLeft: '24px' }}>
                           on {item.siteName}
                         </div>
                       )}
@@ -258,7 +265,7 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                       color: isConfirmed ? '#00ff88' : '#ff6b6b',
                       border: `1px solid ${isConfirmed ? 'rgba(0,255,136,0.25)' : 'rgba(255,107,107,0.25)'}`,
                     }}>
-                      {isConfirmed ? 'Booking Confirmed' : 'Booking Denied'}
+                      {isConfirmed ? confirmLabel : denyLabel}
                     </span>
                   </div>
 

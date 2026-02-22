@@ -12,6 +12,11 @@
  *   If age is insufficient → access denied.
  *
  * MODE 3 — Generic: any other site with "18+" text near a booking button.
+ *
+ * MODE 4 — Paytm instant blocker:
+ *   Shows full-page age gate immediately on paytm.com.
+ *   18+ required to use any financial services.
+ *   If verified → site unlocks. If underage → blocked.
  */
 
 (function () {
@@ -26,6 +31,22 @@
   //  UTILITY: extract movie/event name from page
   // ════════════════════════════════════════════
   function getMovieName() {
+    // Paytm pages — describe the current page/section
+    if (location.hostname.includes('paytm.com')) {
+      var path = location.pathname.toLowerCase()
+      if (path.includes('/login') || path.includes('/signin')) return 'Paytm Sign In'
+      if (path.includes('/wealth') || path.includes('/mutual-fund')) return 'Paytm Investments'
+      if (path.includes('/insurance')) return 'Paytm Insurance'
+      if (path.includes('/credit-card') || path.includes('/bank')) return 'Paytm Banking'
+      if (path.includes('/loan') || path.includes('/lending')) return 'Paytm Loans'
+      if (path.includes('/gold') || path.includes('/digital-gold')) return 'Paytm Gold'
+      if (path.includes('/stocks') || path.includes('/trading')) return 'Paytm Stocks'
+      var h1 = document.querySelector('h1')
+      if (h1 && h1.textContent.trim().length > 0 && h1.textContent.trim().length < 80) {
+        return h1.textContent.trim()
+      }
+      return 'Paytm'
+    }
     // Try H1 first (BMS movie pages have the title as H1)
     var h1 = document.querySelector('h1')
     if (h1 && h1.textContent.trim().length > 0 && h1.textContent.trim().length < 100) {
@@ -41,6 +62,7 @@
 
   function getSiteName() {
     if (location.hostname.includes('bookmyshow.com')) return 'BookMyShow'
+    if (location.hostname.includes('paytm.com')) return 'Paytm'
     if (location.protocol === 'file:') return 'Demo Site'
     return location.hostname.replace(/^www\./, '')
   }
@@ -198,6 +220,8 @@
     backLink.addEventListener('click', function () {
       if (window.history.length > 1) {
         window.history.back()
+      } else if (isPaytm) {
+        window.location.href = 'https://paytm.com'
       } else {
         window.location.href = 'https://in.bookmyshow.com'
       }
@@ -293,6 +317,7 @@
   //  MODE 2: BookMyShow book-button interceptor
   // ════════════════════════════════════════════
   var isBMS = location.hostname.includes('bookmyshow.com')
+  var isPaytm = location.hostname.includes('paytm.com')
   var bookInterceptorAttached = false
 
   function isMovieDetailPage() {
@@ -434,20 +459,46 @@
     var text = (target.textContent || '').trim()
     var href = (target.href || '').toLowerCase()
 
-    // Detect "Book" type buttons
-    var isBook = /book\s*(ticket|pass|now|seat)/i.test(text) ||
-                 /buy\s*(ticket|now|pass)/i.test(text) ||
+    // Detect "Book" type buttons — covers real BookMyShow and similar sites
+    var isBook = /book\s*(ticket|pass|now|seat)?s?/i.test(text) ||
+                 /buy\s*(ticket|now|pass)?s?/i.test(text) ||
                  target.id === 'book-btn' ||
                  target.classList.contains('book-btn') ||
-                 /buytickets|\/booking/i.test(href)
+                 /buytickets|\/booking/i.test(href) ||
+                 // Real BMS uses various classes/attributes for the book button
+                 target.closest('[data-action="book"]') ||
+                 target.closest('.__book-btn') ||
+                 target.closest('[class*="BookButton"]') ||
+                 target.closest('[class*="book-button"]') ||
+                 target.closest('[class*="bookButton"]') ||
+                 // Catch any link/button with just "Book" text on BMS movie pages
+                 (isBMS && isMovieDetailPage() && /^book$/i.test(text))
 
-    if (!isBook) return
+    // Paytm-specific: intercept pay/invest/apply/proceed buttons
+    var isPayAction = /proceed\s*(to)?\s*(pay|invest|apply)?/i.test(text) ||
+                      /verify\s*&?\s*proceed/i.test(text) ||
+                      /pay\s*now/i.test(text) ||
+                      /invest\s*now/i.test(text) ||
+                      /apply\s*now/i.test(text) ||
+                      /start\s*(sip|investing|trading)/i.test(text) ||
+                      /open\s*demat/i.test(text) ||
+                      /buy\s*(gold|insurance|stocks?)/i.test(text) ||
+                      target.id === 'action-btn' ||
+                      target.classList.contains('action-btn')
+
+    if (!isBook && !isPayAction) return
 
     // Detect age rating on the page
     var rating = detectAgeRating()
     if (!rating.restricted) {
       if (isBMS && isMovieDetailPage()) {
         rating = { restricted: true, minAge: 0, label: 'Movie' }
+      } else if (isPaytm || isPayAction) {
+        // Paytm financial services — check for 18+ context
+        var bodyText = document.body ? (document.body.innerText || '') : ''
+        if (/18\+|adults?\s*only|age\s*verif|SEBI|RBI|demat|invest|insurance|loan|credit/i.test(bodyText)) {
+          rating = { restricted: true, minAge: 18, label: '18+ (Financial Service)' }
+        }
       } else if (!isBMS && document.body) {
         var bodyText = document.body.innerText || ''
         if (/movie|film|cinema|showtime/i.test(bodyText)) {
@@ -465,7 +516,24 @@
     e.preventDefault()
     e.stopImmediatePropagation()
 
-    showFullPageBlocker(rating.minAge, rating.label, 'movie', target)
+    var evtType = (isPaytm || isPayAction) ? 'finance' : 'movie'
+    showFullPageBlocker(rating.minAge, rating.label, evtType, target)
+  }
+
+  // ════════════════════════════════════════════
+  //  MODE 4: Paytm — immediate full-page blocker
+  // ════════════════════════════════════════════
+  var paytmBlocked = false
+
+  function tryPaytmBlock() {
+    if (!isPaytm) return
+    if (paytmBlocked) return
+    if (verifiedUpToAge >= 18) return
+    if (document.getElementById('racepass-fullpage-blocker')) return
+    if (!document.body) return
+
+    paytmBlocked = true
+    showFullPageBlocker(18, '18+ (Financial Platform)', 'finance', null)
   }
 
   // ════════════════════════════════════════════
@@ -474,7 +542,7 @@
   var genericBlocked = false
 
   function tryGenericBlock() {
-    if (genericBlocked || isBMS || verifiedUpToAge >= 0) return
+    if (genericBlocked || isBMS || isPaytm || verifiedUpToAge >= 0) return
     if (document.querySelector('[data-racepass]')) return
     if (document.getElementById('racepass-fullpage-blocker')) return
     if (!document.body) return
@@ -528,7 +596,8 @@
   function runAll() {
     injectExplicitButtons()
     interceptBookButtons()
-    if (!isBMS) tryGenericBlock()
+    tryPaytmBlock()
+    if (!isBMS && !isPaytm) tryGenericBlock()
   }
 
   if (document.readyState === 'loading') {
@@ -553,6 +622,7 @@
     if (location.href !== lastUrl) {
       lastUrl = location.href
       genericBlocked = false
+      paytmBlocked = false
       // Remove existing blocker if URL changed (new page might not be restricted)
       var existing = document.getElementById('racepass-fullpage-blocker')
       if (existing) {

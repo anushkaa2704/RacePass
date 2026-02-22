@@ -34,8 +34,17 @@ export async function connectWallet() {
   }
 
   try {
-    // Request account access
-    // This shows the MetaMask popup
+    // Revoke existing permissions so MetaMask always shows the popup
+    try {
+      await window.ethereum.request({
+        method: 'wallet_revokePermissions',
+        params: [{ eth_accounts: {} }]
+      })
+    } catch {
+      // Older MetaMask versions may not support this — ignore
+    }
+
+    // Request account access — this opens the MetaMask popup
     const accounts = await window.ethereum.request({
       method: 'eth_requestAccounts'
     })

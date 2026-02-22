@@ -132,8 +132,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    checkExistingConnection()
-
+    // Listen for account changes (user switches wallet in MetaMask)
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length === 0) {

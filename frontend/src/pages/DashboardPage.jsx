@@ -218,9 +218,9 @@ function DashboardPage({
             animation: 'rotate360 12s linear infinite', pointerEvents: 'none'
           }} />
 
-          <div style={{ position: 'relative', textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ position: 'relative', textAlign: 'center', padding: '20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             {/* Central Shield SVG */}
-            <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 20px' }}>
+            <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Outer rotating ring */}
               <svg width="140" height="140" viewBox="0 0 140 140" style={{ position: 'absolute', animation: 'rotate360 8s linear infinite' }}>
                 <circle cx="70" cy="70" r="66" fill="none" stroke="rgba(0,255,136,0.08)" strokeWidth="1" strokeDasharray="8 4" />
@@ -520,7 +520,7 @@ function DashboardPage({
       </div>
 
       {/* ── Revoke ── */}
-      {isVerified && (
+      {!isLoading && (
         <div style={{ marginTop: '30px', textAlign: 'center', animation: 'fadeIn 0.5s 0.6s both' }}>
           {!revokeConfirm ? (
             <button

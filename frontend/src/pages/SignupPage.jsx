@@ -12,7 +12,7 @@
  * - 3D card tilt, animated steps, perspective transforms
  */
 
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { submitKYC } from '../utils/api'
 import { isMetaMaskInstalled } from '../utils/wallet'
@@ -38,6 +38,13 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
   const [ocrError, setOcrError] = useState('')
   const [isAadhaar, setIsAadhaar] = useState(null)
 
+  // Live Photo
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const [livePhoto, setLivePhoto] = useState(null)
+  const [isCameraOpen, setIsCameraOpen] = useState(false)
+  const [stream, setStream] = useState(null)
+
   // Steps & status
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -49,6 +56,67 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
   const [dragging, setDragging] = useState(false)
 
   // 3D tilt removed for performance
+
+  // ── Camera Effect ──
+  // This ensures the stream is attached to the video element AFTER it renders
+  useEffect(() => {
+    if (isCameraOpen && stream && videoRef.current) {
+      videoRef.current.srcObject = stream
+    }
+  }, [isCameraOpen, stream])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [stream])
+
+  // ── Camera Logic ──
+  const startCamera = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: 640, height: 480 }
+      })
+      setStream(s)
+      setIsCameraOpen(true)
+      setError('')
+    } catch (err) {
+      console.error('Camera error:', err)
+      setError('Could not access camera. Please ensure permissions are granted.')
+    }
+  }
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    setIsCameraOpen(false)
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      const context = canvas.getContext('2d')
+
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+      setLivePhoto(dataUrl)
+      stopCamera()
+    }
+  }
+
+  const retakePhoto = () => {
+    setLivePhoto(null)
+    startCamera()
+  }
 
   // ── Live age calculation ──
   const age = useMemo(() => {
@@ -150,12 +218,13 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
     try {
       if (!imageFile) throw new Error('Please upload your Aadhaar card image')
       if (isAadhaar === false) throw new Error('Please upload a valid Aadhaar card image')
+      if (!livePhoto) throw new Error('Please capture a live photo for authentication')
       if (!formData.fullName.trim()) throw new Error('Please enter your full name')
       if (!formData.dateOfBirth) throw new Error('Date of birth is required — it should be extracted from the Aadhaar')
       if (isInvalidAge) throw new Error('Invalid date of birth')
       if (!aadhaarComplete) throw new Error('Aadhaar must be exactly 12 digits')
 
-      const result = await submitKYC(formData, walletAddress)
+      const result = await submitKYC({ ...formData, livePhoto }, walletAddress)
       setSuccess(true)
       setResultData(result.data || result)
       setIsVerified(true)
@@ -177,7 +246,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
     return (
       <div className="page-center">
         <div className="card glass-card" style={{ maxWidth: '480px', textAlign: 'center', animation: 'emerge3D 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-          <div style={{ marginBottom: '16px', animation: 'float3D 6s ease-in-out infinite' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 12h2"/></svg></div>
+          <div style={{ marginBottom: '16px', animation: 'float3D 6s ease-in-out infinite' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M16 12h2" /></svg></div>
           <h2 style={{ color: '#ff5252', marginBottom: '12px' }}>MetaMask Not Detected</h2>
           <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '15px' }}>
             MetaMask is required to use RacePass.
@@ -197,7 +266,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         Get Your <span className="gradient-text">RacePass</span>
       </h1>
       <p className="page-description" style={{ animation: 'fadeInUp3D 0.8s 0.2s both' }}>
-        Upload your Aadhaar card — details are extracted automatically.
+        Complete KYC with Aadhaar & Live Photo verification.
         <br />
         <span style={{ color: '#00ff88', fontSize: '14px' }}>Processed locally. No data leaves your browser.</span>
       </p>
@@ -231,7 +300,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {/* ── Step 1: Connect Wallet ── */}
         {currentStep === 1 && (
           <div style={{ textAlign: 'center', padding: '20px 0', animation: 'bounceIn3D 0.6s' }}>
-            <div style={{ marginBottom: '16px', animation: 'floatY 4s ease-in-out infinite' }}><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+            <div style={{ marginBottom: '16px', animation: 'floatY 4s ease-in-out infinite' }}><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg></div>
             <h2 className="card-title" style={{ textAlign: 'center' }}>Connect Your Wallet</h2>
             <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '15px' }}>
               Link your wallet to get started.
@@ -246,19 +315,19 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {currentStep === 2 && !success && (
           <form onSubmit={handleSubmit}>
             <h2 className="card-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'8px'}}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> KYC Verification
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> KYC Verification
             </h2>
 
             {/* Wallet badge */}
             <div className="alert alert-info" style={{ marginBottom: '24px', fontSize: '13px', padding: '10px 14px' }}>
-              <span style={{ marginRight: '6px', display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background:'#00ff88' }}></span>
+              <span style={{ marginRight: '6px', display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88' }}></span>
               {walletAddress?.slice(0, 10)}...{walletAddress?.slice(-6)}
             </div>
 
             {/* ── Aadhaar Image Upload ── */}
             <div className="form-group">
               <label className="form-label">
-                Aadhaar Card Image <span style={{ color: '#ff5252' }}>*</span>
+                1. Aadhaar Card Image <span style={{ color: '#ff5252' }}>*</span>
               </label>
 
               {!imagePreview ? (
@@ -269,7 +338,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                   onDragOver={handleDragOver}
                   onDragLeave={() => setDragging(false)}
                 >
-                  <div style={{ marginBottom: '10px', animation: 'floatY 3s ease-in-out infinite' }}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                  <div style={{ marginBottom: '10px', animation: 'floatY 3s ease-in-out infinite' }}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg></div>
                   <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '15px', marginBottom: '6px' }}>
                     {dragging ? 'Drop your Aadhaar here' : 'Upload Aadhaar Card'}
                   </div>
@@ -330,6 +399,70 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               )}
             </div>
 
+            {/* ── Live Photo Capture ── */}
+            <div className="form-group" style={{ marginTop: '30px' }}>
+              <label className="form-label">
+                2. Live Photo Verification <span style={{ color: '#ff5252' }}>*</span>
+              </label>
+
+              {!livePhoto ? (
+                <div className="camera-container" style={{ position: 'relative', minHeight: isCameraOpen ? 'auto' : '150px' }}>
+                  {isCameraOpen ? (
+                    <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '2px solid #00ff88', animation: 'fadeIn 0.5s' }}>
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        style={{ width: '100%', height: 'auto', display: 'block', background: '#000' }}
+                      />
+                      <div className="camera-scan-effect" />
+                      <div style={{ position: 'absolute', bottom: '15px', left: '0', right: '0', display: 'flex', justifyContent: 'center', gap: '10px', zIndex: 10 }}>
+                        <button type="button" className="btn btn-primary" onClick={capturePhoto} style={{ padding: '8px 20px' }}>
+                          Capture
+                        </button>
+                        <button type="button" className="btn btn-secondary" onClick={stopCamera} style={{ padding: '8px 20px', background: 'rgba(0,0,0,0.5)' }}>
+                          Cancel
+                        </button>
+                      </div>
+                      <canvas ref={canvasRef} style={{ display: 'none' }} />
+                    </div>
+                  ) : (
+                    <div
+                      className="upload-zone"
+                      onClick={startCamera}
+                    >
+                      <div style={{ marginBottom: '10px' }}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg></div>
+                      <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '15px', marginBottom: '6px' }}>
+                        Click Live Photo
+                      </div>
+                      <div style={{ color: '#64748b', fontSize: '13px' }}>
+                        Open camera to verify your identity
+                      </div>
+                      <div style={{ marginTop: '10px', color: '#ffc107', fontSize: '11px', fontWeight: 600 }}>
+                        ⚠️ CAMERA ONLY - NO FILE UPLOAD
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ position: 'relative' }}>
+                  <div className="image-preview-container" style={{ animation: 'slideUp3D 0.4s', border: '2px solid #00ff88' }}>
+                    <img src={livePhoto} alt="Live Preview" className="image-preview" />
+                    <button
+                      type="button"
+                      onClick={retakePhoto}
+                      className="image-remove-btn"
+                      style={{ background: '#00ff88', color: '#0a0a14' }}
+                      title="Retake photo"
+                    >↻</button>
+                  </div>
+                  <div className="ocr-badge ocr-badge-success">
+                    Live photo captured successfully
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="form-divider">
               <span>Extracted Details</span>
             </div>
@@ -341,7 +474,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 type="text"
                 name="fullName"
                 className="form-input"
-                placeholder={ocrDone ? 'Auto-filled from Aadhaar' : 'Will be extracted from Aadhaar'}
+                placeholder={ocrDone ? 'Auto-filled' : 'Waiting for Aadhaar...'}
                 value={formData.fullName}
                 onChange={handleInputChange}
                 required
@@ -351,7 +484,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               />
               {ocrDone && (
                 <div style={{ marginTop: '4px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   Locked — extracted from Aadhaar
                 </div>
               )}
@@ -376,7 +509,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               )}
               {ocrDone && formData.dateOfBirth && (
                 <div style={{ marginTop: '4px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   Locked — extracted from Aadhaar
                 </div>
               )}
@@ -401,7 +534,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
                 <small style={{ color: '#475569', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {ocrDone ? (
-                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Locked — extracted from Aadhaar</>
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> Locked — extracted from Aadhaar</>
                   ) : '12-digit number from Aadhaar'}
                 </small>
                 <small style={{ color: aadhaarComplete ? '#00ff88' : '#64748b', fontSize: '12px', fontWeight: aadhaarComplete ? 600 : 400 }}>
@@ -416,14 +549,14 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               type="submit"
               className="btn btn-primary btn-glow"
               style={{ width: '100%', padding: '14px', fontSize: '16px', marginTop: '8px' }}
-              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false}
+              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false || !livePhoto || !imageFile}
             >
               {isLoading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <span className="spinner" style={{ width: '18px', height: '18px', borderWidth: '2px' }}></span>
                   Verifying...
                 </span>
-              ) : 'Submit KYC'}
+              ) : 'Submit KYC & Get Pass'}
             </button>
           </form>
         )}
@@ -431,7 +564,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {/* ── Step 3: Success ── */}
         {success && (
           <div style={{ textAlign: 'center', padding: '30px 10px', animation: 'emerge3D 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-            <div style={{ marginBottom: '16px', animation: 'bounceIn3D 0.8s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div style={{ marginBottom: '16px', animation: 'bounceIn3D 0.8s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg></div>
             <h2 style={{ color: '#00ff88', marginBottom: '10px' }}>Verification Successful!</h2>
             <p style={{ color: '#94a3b8', marginBottom: '20px' }}>
               Your RacePass has been activated. Redirecting to dashboard...
@@ -446,8 +579,8 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         color: '#64748b', fontSize: '12px', lineHeight: '1.6',
         animation: 'fadeInUp3D 0.8s 0.5s both'
       }}>
-        Your Aadhaar is processed <strong>entirely in-browser</strong> via Tesseract.js.
-        Only a SHA-256 fingerprint is stored on-chain.
+        Your Aadhaar and Live Photo are processed <strong>entirely in-browser</strong>.
+        Only a secure cryptographic proof is stored on our servers.
       </div>
     </div>
   )

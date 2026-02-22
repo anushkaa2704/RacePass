@@ -118,7 +118,8 @@ router.post('/submit', async (req, res) => {
     }
 
     // ── Duplicate check ──
-    if (credentialStore.has(walletAddress.toLowerCase())) {
+    const existingCred = credentialStore.get(walletAddress.toLowerCase())
+    if (existingCred && !existingCred.revoked) {
       console.log(`⚠️ Duplicate submission for: ${walletAddress}`)
       return res.status(409).json({
         success: false,

@@ -41,7 +41,9 @@
   "host_permissions": [
     "http://localhost:3001/*",
     "https://in.bookmyshow.com/*",
-    "https://www.bookmyshow.com/*"
+    "https://www.bookmyshow.com/*",
+    "https://paytm.com/*",
+    "https://www.paytm.com/*"
   ],
 
   "web_accessible_resources": [
