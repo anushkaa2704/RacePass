@@ -25,6 +25,7 @@ import cors from 'cors'
 import kycRoutes from './routes/kyc.js'
 import verifyRoutes from './routes/verify.js'
 import thirdPartyRoutes from './routes/thirdParty.js'
+import eventsRoutes from './routes/events.js'
 
 // Create the Express app
 const app = express()
@@ -92,6 +93,9 @@ app.use('/api/verify', verifyRoutes)
 // Third-party routes - for concert/event websites
 app.use('/api/third-party', thirdPartyRoutes)
 
+// Event marketplace routes - organizers, events, tickets, ZKP
+app.use('/api/events', eventsRoutes)
+
 // ============================================
 // ERROR HANDLING
 // ============================================
@@ -124,12 +128,13 @@ process.on('unhandledRejection', (reason) => {
 
 const PORT = process.env.PORT || 3001
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('')
   console.log('🚀 ================================')
   console.log('   RacePass Backend Started!')
   console.log('================================')
   console.log(`📍 Server: http://localhost:${PORT}`)
+  console.log(`📱 LAN:    http://0.0.0.0:${PORT} (accessible from phone)`)
   console.log(`❤️  Health: http://localhost:${PORT}/health`)
   console.log('================================')
   console.log('')

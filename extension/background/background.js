@@ -97,14 +97,19 @@ async function handleVerifyForSite(message) {
     return {
       success: true,
       verified: data.verified,
+      verifiedOnChain: data.verifiedOnChain || false,
+      verificationSource: data.verificationSource || 'local',
       walletAddress: message.walletAddress,
       reason: data.reason,
       message: data.message,
       fingerprint: data.fingerprint,
       isAdult: data.isAdult,
       eventType: data.eventType,
-      userAge: data.userAge,
-      minAge: data.minAge
+      minAge: data.minAge,
+      // Crypto proof metadata
+      cryptoProof: data.cryptoProof || null,
+      hasAgeAttestation: data.hasAgeAttestation || false,
+      reputation: data.reputation || null
     }
   } catch (err) {
     return { success: false, verified: false, error: err.message }

@@ -132,3 +132,113 @@ export async function getActivityLog(walletAddress) {
   return safeFetch(`${API.BACKEND_URL}/api/kyc/activity/${walletAddress}`)
 }
 
+// ─── Auth (Role Registration) ──────────────────
+
+export async function registerUser(walletAddress, role, name = '', email = '') {
+  return safeFetch(`${API.BACKEND_URL}/api/events/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress, role, name, email })
+  })
+}
+
+export async function getMe(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/auth/me/${walletAddress}`)
+}
+
+// ─── Events (Marketplace) ──────────────────────
+
+export async function createEvent(eventData) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(eventData)
+  })
+}
+
+export async function listEvents() {
+  return safeFetch(`${API.BACKEND_URL}/api/events/list`)
+}
+
+export async function getOrganizerEvents(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/organizer/${walletAddress}`)
+}
+
+export async function getEventDetails(eventId) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/${eventId}`)
+}
+
+// ─── Event Registration + ZKP ──────────────────
+
+export async function registerForEvent(walletAddress, eventId) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress, eventId })
+  })
+}
+
+export async function checkZKPDisclosures(walletAddress, eventId) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/zkp/check`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress, eventId })
+  })
+}
+
+// ─── Tickets ───────────────────────────────────
+
+export async function getMyTickets(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/my-tickets/${walletAddress}`)
+}
+
+export async function validateTicket(qrToken) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/ticket/${qrToken}`)
+}
+
+export async function scanTicket(qrToken, scannerWallet) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/ticket/scan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ qrToken, scannerWallet })
+  })
+}
+
+export async function markAttendance(qrToken, status) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/ticket/attendance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ qrToken, status })
+  })
+}
+
+// ─── Notifications ─────────────────────────────
+
+export async function getNotifications(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/notifications/${walletAddress}`)
+}
+
+export async function markNotificationsRead(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/notifications/read`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress })
+  })
+}
+
+// ─── Reputation (Selective Disclosure) ─────────
+
+export async function getReputation(walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/reputation/${walletAddress}`)
+}
+
+// ─── Delete Event ──────────────────────────────
+
+export async function deleteEvent(eventId, walletAddress) {
+  return safeFetch(`${API.BACKEND_URL}/api/events/${eventId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress })
+  })
+}
+

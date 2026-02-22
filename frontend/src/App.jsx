@@ -9,13 +9,16 @@
  */
 
 import { useState, useEffect, Component } from 'react'
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
 
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import ConcertPage from './pages/ConcertPage'
 import ProfilePage from './pages/ProfilePage'
+import LandingPage from './pages/LandingPage'
+import OrganizerDashboard from './pages/OrganizerDashboard'
+import MarketplacePage from './pages/MarketplacePage'
 
 import { connectWallet, getWalletAddress, checkIfWalletConnected } from './utils/wallet'
 
@@ -41,7 +44,7 @@ class ErrorBoundary extends Component {
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexDirection: 'column', background: '#0a0a14', color: '#fff', padding: '40px'
         }}>
-          <div style={{ fontSize: '64px', marginBottom: '20px', animation: 'bounceIn3D 0.8s' }}>💥</div>
+          <div style={{ marginBottom: '20px', animation: 'bounceIn3D 0.8s' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           <h1 style={{ color: '#ff5252', marginBottom: '10px' }}>Something went wrong</h1>
           <p style={{ color: '#94a3b8', maxWidth: '500px', textAlign: 'center', marginBottom: '20px' }}>
             {this.state.error?.message || 'An unexpected error occurred.'}
@@ -83,7 +86,7 @@ function OfflineBanner() {
       padding: '10px', fontWeight: 'bold', fontSize: '14px',
       animation: 'alertSlide 0.4s ease'
     }}>
-      ⚠️ You are offline — some features may not work.
+      You are offline — some features may not work.
     </div>
   )
 }
@@ -119,6 +122,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [scrolled, setScrolled] = useState(false)
+  const [userRole, setUserRole] = useState(() => localStorage.getItem('racepass_role') || null)
 
   // Track scroll for header glass effect
   useEffect(() => {
@@ -181,16 +185,26 @@ function App() {
         <div className="app-container">
           <header className="header" style={{
             backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'blur(10px)',
-            borderBottom: scrolled ? '1px solid rgba(0, 217, 255, 0.08)' : '1px solid transparent',
+            borderBottom: scrolled ? '1px solid rgba(0, 255, 136, 0.08)' : '1px solid transparent',
             boxShadow: scrolled ? '0 4px 30px rgba(0, 0, 0, 0.3)' : 'none',
             transition: 'all 0.4s ease'
           }}>
             <Link to="/" className="logo">Race<span>Pass</span></Link>
             <nav className="nav">
               <Link to="/" className="nav-link">Home</Link>
-              <Link to="/signup" className="nav-link">Signup</Link>
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/concert" className="nav-link">Events</Link>
+              <Link to="/landing" className="nav-link">Login</Link>
+              <Link to="/signup" className="nav-link">KYC</Link>
+              {userRole === 'organizer' ? (
+                <>
+                  <Link to="/organizer" className="nav-link">Organizer</Link>
+                  <Link to="/dashboard" className="nav-link">User</Link>
+                </>
+              ) : (
+                <>
+                  <Link to={userRole === 'user' ? '/dashboard' : '/landing'} className="nav-link">User</Link>
+                  <Link to={userRole === 'user' ? '/marketplace' : '/landing'} className="nav-link">Marketplace</Link>
+                </>
+              )}
               {isWalletConnected ? (
                 <Link to="/profile" className="wallet-info" style={{
                   animation: 'fadeUp 0.4s ease',
@@ -204,7 +218,7 @@ function App() {
                   textDecoration: 'none',
                   cursor: 'pointer'
                 }}>
-                  <span>🟢</span>
+                  <span style={{display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',background:'#00ff88'}}></span>
                   <span className="wallet-address">{shortenAddress(walletAddress)}</span>
                 </Link>
               ) : (
@@ -240,6 +254,24 @@ function App() {
               <Route path="/profile" element={
                 <ProfilePage isWalletConnected={isWalletConnected} walletAddress={walletAddress}
                   isVerified={isVerified} />
+              } />
+              <Route path="/landing" element={
+                <LandingPage isWalletConnected={isWalletConnected} walletAddress={walletAddress}
+                  onConnectWallet={handleConnectWallet} setUserRole={setUserRole} />
+              } />
+              <Route path="/organizer" element={
+                userRole === 'organizer' ? (
+                  <OrganizerDashboard isWalletConnected={isWalletConnected} walletAddress={walletAddress}
+                    onConnectWallet={handleConnectWallet} />
+                ) : <Navigate to="/landing" replace />
+              } />
+              <Route path="/marketplace" element={
+                userRole === 'organizer' ? (
+                  <Navigate to="/organizer" replace />
+                ) : (
+                  <MarketplacePage isWalletConnected={isWalletConnected} walletAddress={walletAddress}
+                    onConnectWallet={handleConnectWallet} />
+                )
               } />
             </Routes>
           </PageTransition>

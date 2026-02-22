@@ -93,19 +93,19 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
   }
 
   const eventDisplayNames = {
-    concert: '🎸 Electric Dreams Festival 2025',
-    bar: '🍺 Skyline Sports Bar',
-    gallery: '🎨 Modern Art Exhibition',
-    general: '📌 General Event'
+    concert: 'Electric Dreams Festival 2025',
+    bar: 'Skyline Sports Bar',
+    gallery: 'Modern Art Exhibition',
+    general: 'General Event'
   }
 
   if (!isWalletConnected) {
     return (
       <div className="page-center">
         <div className="dashboard" style={{ animation: 'fadeUp 0.5s ease' }}>
-          <div className="dashboard-icon" style={{ background: '#555' }}>👤</div>
+          <div className="dashboard-icon" style={{ background: '#555' }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <h1 className="dashboard-title">Connect Your Wallet</h1>
-          <p className="dashboard-subtitle">Please connect MetaMask to view your profile.</p>
+          <p className="dashboard-subtitle">Connect MetaMask to view your profile.</p>
         </div>
       </div>
     )
@@ -116,7 +116,7 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
       <div className="page-center">
         <div className="dashboard" style={{ animation: 'fadeUp 0.5s ease' }}>
           <div className="spinner" style={{ margin: '40px auto' }}></div>
-          <h2 style={{ color: '#00d9ff' }}>Loading Profile...</h2>
+          <h2 style={{ color: '#00ff88' }}>Loading Profile...</h2>
         </div>
       </div>
     )
@@ -131,20 +131,28 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
           style={{
             background: isVerified
               ? 'linear-gradient(135deg, #00ff88 0%, #00cc66 100%)'
-              : 'linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)'
+              : 'linear-gradient(135deg, #2a2a3a 0%, #3a3a4a 100%)'
           }}
         >
-          {isVerified ? '✓' : '✕'}
+          {isVerified ? '✓' : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
         </div>
 
         <h1 className="dashboard-title">My Profile</h1>
-        <p className="dashboard-subtitle">
-          {isVerified ? 'Your RacePass is active' : 'Your RacePass is not active'}
-        </p>
 
-        <div className={`status-badge ${isVerified ? 'status-verified' : 'status-not-verified'}`}>
-          {isVerified ? '● Verified' : '○ Not Verified'}
+        <div className={`status-badge ${isVerified ? 'status-verified' : 'status-pending'}`}>
+          {isVerified ? '● Verified' : 'Pending Verification'}
         </div>
+
+        {!isVerified && (
+          <div style={{ marginTop: '16px' }}>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '12px' }}>
+              Complete KYC to activate your RacePass
+            </p>
+            <Link to="/signup" className="btn btn-primary" style={{ fontSize: '14px' }}>
+              Get Verified →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Wallet Info */}
@@ -152,15 +160,15 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
         maxWidth: '600px', width: '100%', marginTop: '20px',
         animation: 'fadeUp 0.4s 0.1s both'
       }}>
-        <h3 className="card-title">🔗 Wallet</h3>
-        <div style={{ color: '#00d9ff', fontSize: '14px', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+        <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Wallet</h3>
+        <div style={{ color: '#00ff88', fontSize: '14px', wordBreak: 'break-all', fontFamily: 'monospace' }}>
           {walletAddress}
         </div>
         <a
           href={`${SEPOLIA_EXPLORER}/address/${walletAddress}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: '#6366f1', fontSize: '13px', marginTop: '8px', display: 'inline-block' }}
+          style={{ color: '#00cc66', fontSize: '13px', marginTop: '8px', display: 'inline-block' }}
         >
           View on Etherscan ↗
         </a>
@@ -172,42 +180,14 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
           maxWidth: '600px', width: '100%', marginTop: '20px',
           animation: 'fadeUp 0.4s 0.15s both'
         }}>
-          <h3 className="card-title">🪪 Credential Details</h3>
+          <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 7h20"/></svg>Credential Details</h3>
 
-          <div className="grid-2" style={{ gap: '15px', marginBottom: '15px' }}>
-            <div>
-              <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>Age Status</div>
-              <div className={`status-badge ${credential.isAdult ? 'status-verified' : 'status-pending'}`} style={{ fontSize: '13px' }}>
-                {credential.ageCategory === '21+' ? '🟢 21+' : credential.isAdult ? '🟢 18+' : '🟡 Under 18'}
-              </div>
-            </div>
-            <div>
-              <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>Expires</div>
-              <div style={{ color: '#00d9ff', fontSize: '14px', fontWeight: 'bold' }}>
-                {credential.expiresAt ? new Date(credential.expiresAt).toLocaleDateString() : '—'}
-              </div>
+          <div style={{ marginBottom: '15px' }}>
+            <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>Expires</div>
+            <div style={{ color: '#00ff88', fontSize: '14px', fontWeight: 'bold' }}>
+              {credential.expiresAt ? new Date(credential.expiresAt).toLocaleDateString() : '—'}
             </div>
           </div>
-
-          {credential.credentialId && (
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>Token / Credential ID</div>
-              <div style={{
-                color: '#00d9ff', fontSize: '12px', wordBreak: 'break-all',
-                fontFamily: 'monospace', background: 'rgba(0, 217, 255, 0.06)',
-                padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(0, 217, 255, 0.1)'
-              }}>
-                {credential.credentialId}
-              </div>
-            </div>
-          )}
-
-          {credential.fingerprint && (
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}>Fingerprint (SHA-256)</div>
-              <div className="fingerprint">{credential.fingerprint}</div>
-            </div>
-          )}
 
           <div className="grid-2" style={{ gap: '15px' }}>
             {credential.issuanceDate && (
@@ -226,51 +206,20 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
         </div>
       )}
 
-      {/* Blockchain Transactions */}
-      {txHashes.length > 0 && (
-        <div className="card glass-card" style={{
-          maxWidth: '600px', width: '100%', marginTop: '20px',
-          animation: 'fadeUp 0.4s 0.2s both'
-        }}>
-          <h3 className="card-title">⛓️ On-Chain Records</h3>
-          {txHashes.map((tx, i) => (
-            <div key={i} style={{
-              padding: '12px', marginBottom: i < txHashes.length - 1 ? '10px' : 0,
-              background: 'rgba(255,255,255,0.03)', borderRadius: '10px',
-              border: '1px solid rgba(255,255,255,0.06)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ color: '#00d9ff', fontSize: '13px', fontWeight: 'bold' }}>{tx.chain}</span>
-                {tx.block && <span style={{ color: '#64748b', fontSize: '11px' }}>Block #{tx.block}</span>}
-              </div>
-              <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#94a3b8', wordBreak: 'break-all' }}>
-                {tx.hash}
-              </div>
-              <a
-                href={`${tx.chain.includes('Sepolia') ? SEPOLIA_EXPLORER : 'https://www.oklink.com/amoy'}/tx/${tx.hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#6366f1', fontSize: '12px', marginTop: '6px', display: 'inline-block' }}
-              >
-                View Transaction ↗
-              </a>
-            </div>
-          ))}
-        </div>
-      )}
+
 
       {/* ══════════ Booking History ══════════ */}
       <div className="card glass-card" style={{
         maxWidth: '600px', width: '100%', marginTop: '20px',
         animation: 'fadeUp 0.4s 0.25s both'
       }}>
-        <h3 className="card-title">🎬 Booking History</h3>
+        <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>Booking History</h3>
         {bookingHistory.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: '40px', marginBottom: '10px', opacity: 0.5 }}>🎫</div>
+            <div style={{ marginBottom: '10px' }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12l5 5L22 2"/><rect x="1" y="3" width="15" height="18" rx="2"/></svg></div>
             <p style={{ color: '#64748b', fontSize: '14px' }}>No booking attempts yet</p>
             <p style={{ color: '#475569', fontSize: '12px', marginTop: '6px' }}>
-              Visit a movie page with the RacePass extension to see your history here.
+              Visit events to see your history here.
             </p>
           </div>
         ) : (
@@ -292,7 +241,7 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: '#fff', fontSize: '15px', fontWeight: 600 }}>
-                        🎬 {item.movieName || item.eventType || 'Unknown'}
+                        {item.movieName || item.eventType || 'Unknown'}
                       </div>
                       {item.siteName && (
                         <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '3px' }}>
@@ -309,7 +258,7 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                       color: isConfirmed ? '#00ff88' : '#ff6b6b',
                       border: `1px solid ${isConfirmed ? 'rgba(0,255,136,0.25)' : 'rgba(255,107,107,0.25)'}`,
                     }}>
-                      {isConfirmed ? '✅ Booking Confirmed' : '🚫 Booking Denied'}
+                      {isConfirmed ? 'Booking Confirmed' : 'Booking Denied'}
                     </span>
                   </div>
 
@@ -326,16 +275,13 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
                       {item.minAge > 0 ? (
                         <span style={{ color: isConfirmed ? '#00ff88' : '#ff9999' }}>
                           Required: <strong>{item.minAge}+</strong>
-                          {item.userAge != null && (
-                            <> &nbsp;|&nbsp; Your age: <strong>{item.userAge}</strong></>
-                          )}
                         </span>
                       ) : (
-                        <span style={{ color: '#00d9ff' }}>Identity verification{isConfirmed ? ' passed' : ' required'}</span>
+                        <span style={{ color: '#00ff88' }}>Identity verification{isConfirmed ? ' passed' : ' required'}</span>
                       )}
                       {!isConfirmed && item.minAge > 0 && (
                         <div style={{ color: '#ff6b6b', marginTop: '4px', fontSize: '11px' }}>
-                          Reason: Age {item.userAge != null ? item.userAge : '?'} does not meet the {item.minAge}+ requirement
+                          Does not meet the {item.minAge}+ requirement
                         </div>
                       )}
                     </div>
@@ -352,43 +298,83 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
         )}
       </div>
 
-      {/* Activity Timeline */}
+      {/* Activity Timeline — 3D Animated */}
       {activities.length > 0 && (
         <div className="card glass-card" style={{
           maxWidth: '600px', width: '100%', marginTop: '20px',
           animation: 'fadeUp 0.4s 0.3s both'
         }}>
-          <h3 className="card-title">📋 Activity Timeline</h3>
-          <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-            {activities.slice().reverse().map((a, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between',
-                padding: '10px 0',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                fontSize: '13px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{
-                    a.action === 'KYC_SUBMITTED' ? '📝' :
-                    a.action === 'THIRD_PARTY_VERIFIED' ? '✅' :
-                    a.action === 'AGE_GATE_BLOCKED' ? '🚫' :
-                    a.action === 'CREDENTIAL_REVOKED' ? '🗑️' : '📌'
-                  }</span>
-                  <span style={{ color: '#ccc' }}>
-                    {a.action === 'KYC_SUBMITTED' ? 'KYC Completed' :
-                     a.action === 'THIRD_PARTY_VERIFIED'
-                       ? `Verified${a.movieName ? ` — ${a.movieName}` : ''}${a.siteName ? ` on ${a.siteName}` : ''}${a.eventType && !a.movieName ? ` (${a.eventType})` : ''}`
-                       : a.action === 'AGE_GATE_BLOCKED'
-                       ? `Blocked${a.movieName ? ` — ${a.movieName}` : ''}${a.siteName ? ` on ${a.siteName}` : ''} (needs ${a.minAge}+, age ${a.userAge || '?'})`
-                       : a.action === 'CREDENTIAL_REVOKED' ? 'Credential Revoked' :
-                     a.action.replace(/_/g, ' ')}
-                  </span>
+          <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Activity Timeline
+          </h3>
+          <div style={{ position: 'relative', padding: '8px 0 8px 32px', maxHeight: '350px', overflowY: 'auto' }}>
+            {/* Vertical line */}
+            <div style={{
+              position: 'absolute', left: '11px', top: 0, bottom: 0, width: '2px',
+              background: 'linear-gradient(to bottom, #00ff88 0%, rgba(0,255,136,0.1) 100%)'
+            }} />
+
+            {activities.slice().reverse().map((a, i) => {
+              const isKYC = a.action === 'KYC_SUBMITTED'
+              const isVerified = a.action === 'THIRD_PARTY_VERIFIED'
+              const isBlocked = a.action === 'AGE_GATE_BLOCKED'
+              const isRevoked = a.action === 'CREDENTIAL_REVOKED'
+              const nodeColor = isBlocked ? '#ff5252' : isRevoked ? '#ff9800' : '#00ff88'
+
+              return (
+                <div key={i} style={{
+                  position: 'relative', marginBottom: '20px',
+                  animation: `fadeInUp3D 0.5s ${0.08 * i}s both`,
+                  perspective: '600px'
+                }}>
+                  {/* Node dot */}
+                  <div style={{
+                    position: 'absolute', left: '-27px', top: '4px',
+                    width: '14px', height: '14px', borderRadius: '50%',
+                    background: nodeColor,
+                    boxShadow: `0 0 12px ${nodeColor}60, 0 0 4px ${nodeColor}40`,
+                    border: '2px solid #0a0a0a',
+                    animation: i === 0 ? 'pulse 2s ease-in-out infinite' : 'none',
+                    zIndex: 2
+                  }} />
+
+                  {/* Card */}
+                  <div style={{
+                    padding: '14px 16px', borderRadius: '12px',
+                    background: 'rgba(0,0,0,0.25)',
+                    border: `1px solid ${isBlocked ? 'rgba(255,82,82,0.15)' : 'rgba(0,255,136,0.08)'}`,
+                    transform: 'translateZ(0)',
+                    transition: 'all 0.3s ease',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 600, marginBottom: '2px' }}>
+                          {isKYC ? 'KYC Completed' :
+                           isVerified ? `Event Verified${a.movieName ? ` — ${a.movieName}` : ''}${a.siteName ? ` on ${a.siteName}` : ''}` :
+                           isBlocked ? `Access Denied${a.movieName ? ` — ${a.movieName}` : ''}` :
+                           isRevoked ? 'Credential Revoked' :
+                           a.action.replace(/_/g, ' ')}
+                        </div>
+                        {isBlocked && a.minAge && (
+                          <div style={{ color: '#ff9999', fontSize: '11px' }}>
+                            Required: {a.minAge}+
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: '10px', color: '#475569', whiteSpace: 'nowrap',
+                        padding: '2px 8px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)'
+                      }}>
+                        {new Date(a.timestamp).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <span style={{ color: '#64748b', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                  {new Date(a.timestamp).toLocaleString()}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -402,15 +388,12 @@ function ProfilePage({ isWalletConnected, walletAddress, isVerified }) {
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '12px', marginTop: '25px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {!isVerified && (
-          <Link to="/signup" className="btn btn-primary">Complete KYC</Link>
-        )}
         {isVerified && (
-          <Link to="/concert" className="btn btn-primary">🎸 Browse Events</Link>
+          <Link to="/marketplace" className="btn btn-primary">Browse Events</Link>
         )}
         <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>
         <button className="btn btn-secondary" onClick={loadProfile} disabled={loading}>
-          🔄 Refresh
+          Refresh
         </button>
       </div>
     </div>

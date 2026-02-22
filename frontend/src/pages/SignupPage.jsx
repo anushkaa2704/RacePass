@@ -177,10 +177,10 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
     return (
       <div className="page-center">
         <div className="card glass-card" style={{ maxWidth: '480px', textAlign: 'center', animation: 'emerge3D 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px', animation: 'float3D 6s ease-in-out infinite' }}>🦊</div>
+          <div style={{ marginBottom: '16px', animation: 'float3D 6s ease-in-out infinite' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 12h2"/></svg></div>
           <h2 style={{ color: '#ff5252', marginBottom: '12px' }}>MetaMask Not Detected</h2>
           <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '15px' }}>
-            RacePass requires MetaMask to connect your blockchain wallet.
+            MetaMask is required to use RacePass.
           </p>
           <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
             Install MetaMask
@@ -197,9 +197,9 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         Get Your <span className="gradient-text">RacePass</span>
       </h1>
       <p className="page-description" style={{ animation: 'fadeInUp3D 0.8s 0.2s both' }}>
-        Upload your Aadhaar card — we'll extract your details automatically.
+        Upload your Aadhaar card — details are extracted automatically.
         <br />
-        <span style={{ color: '#00ff88', fontSize: '14px' }}>Everything runs locally in your browser. No image is sent to any server.</span>
+        <span style={{ color: '#00ff88', fontSize: '14px' }}>Processed locally. No data leaves your browser.</span>
       </p>
 
       {/* Steps indicator */}
@@ -231,13 +231,13 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {/* ── Step 1: Connect Wallet ── */}
         {currentStep === 1 && (
           <div style={{ textAlign: 'center', padding: '20px 0', animation: 'bounceIn3D 0.6s' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px', animation: 'floatY 4s ease-in-out infinite' }}>🔗</div>
+            <div style={{ marginBottom: '16px', animation: 'floatY 4s ease-in-out infinite' }}><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
             <h2 className="card-title" style={{ textAlign: 'center' }}>Connect Your Wallet</h2>
             <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '15px' }}>
-              Connect MetaMask to link your blockchain identity.
+              Link your wallet to get started.
             </p>
             <button className="btn btn-primary btn-glow" onClick={onConnectWallet} style={{ padding: '14px 32px', fontSize: '16px' }}>
-              🦊 Connect MetaMask
+              Connect MetaMask
             </button>
           </div>
         )}
@@ -246,12 +246,12 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {currentStep === 2 && !success && (
           <form onSubmit={handleSubmit}>
             <h2 className="card-title">
-              <span style={{ marginRight: '8px' }}>🪪</span> KYC Verification
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'8px'}}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> KYC Verification
             </h2>
 
             {/* Wallet badge */}
             <div className="alert alert-info" style={{ marginBottom: '24px', fontSize: '13px', padding: '10px 14px' }}>
-              <span style={{ marginRight: '6px' }}>🟢</span>
+              <span style={{ marginRight: '6px', display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background:'#00ff88' }}></span>
               {walletAddress?.slice(0, 10)}...{walletAddress?.slice(-6)}
             </div>
 
@@ -269,7 +269,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                   onDragOver={handleDragOver}
                   onDragLeave={() => setDragging(false)}
                 >
-                  <div style={{ fontSize: '44px', marginBottom: '10px', animation: 'floatY 3s ease-in-out infinite' }}>📷</div>
+                  <div style={{ marginBottom: '10px', animation: 'floatY 3s ease-in-out infinite' }}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                   <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '15px', marginBottom: '6px' }}>
                     {dragging ? 'Drop your Aadhaar here' : 'Upload Aadhaar Card'}
                   </div>
@@ -300,8 +300,8 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                   {ocrRunning && (
                     <div style={{ marginTop: '12px', animation: 'fadeIn 0.3s' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ color: '#94a3b8', fontSize: '13px' }}>🔍 Scanning Aadhaar card...</span>
-                        <span style={{ color: '#00d9ff', fontSize: '13px', fontWeight: 600 }}>{ocrProgress}%</span>
+                        <span style={{ color: '#94a3b8', fontSize: '13px' }}>Scanning Aadhaar card...</span>
+                        <span style={{ color: '#00ff88', fontSize: '13px', fontWeight: 600 }}>{ocrProgress}%</span>
                       </div>
                       <div className="progress-track">
                         <div className="progress-fill" style={{ width: `${ocrProgress}%` }}></div>
@@ -312,12 +312,12 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                   {/* Validation badges */}
                   {!ocrRunning && isAadhaar === true && (
                     <div className="ocr-badge ocr-badge-success">
-                      ✅ Valid Aadhaar card detected — details extracted
+                      Valid Aadhaar card detected — details extracted
                     </div>
                   )}
                   {!ocrRunning && isAadhaar === false && (
                     <div className="ocr-badge ocr-badge-error">
-                      ❌ Not an Aadhaar card — please upload a valid Aadhaar
+                      Not an Aadhaar card — please upload a valid Aadhaar
                     </div>
                   )}
                 </div>
@@ -345,8 +345,16 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 value={formData.fullName}
                 onChange={handleInputChange}
                 required
+                readOnly={ocrDone}
                 autoComplete="name"
+                style={ocrDone ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
               />
+              {ocrDone && (
+                <div style={{ marginTop: '4px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Locked — extracted from Aadhaar
+                </div>
+              )}
             </div>
 
             {/* DOB */}
@@ -360,24 +368,16 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 onChange={handleInputChange}
                 max={new Date().toISOString().split('T')[0]}
                 required
+                readOnly={ocrDone}
+                style={ocrDone ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
               />
-              {age !== null && !isInvalidAge && (
-                <div style={{
-                  marginTop: '8px', fontSize: '13px',
-                  color: isMinor ? '#ffc107' : '#00ff88',
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  animation: 'fadeIn 0.3s'
-                }}>
-                  {isMinor ? '⚠️' : '✅'} Age: {age}
-                  {isMinor && ' — Under 18. Some age-restricted events won\'t be accessible.'}
-                </div>
-              )}
               {isInvalidAge && (
-                <div style={{ marginTop: '8px', fontSize: '13px', color: '#ff5252' }}>❌ Invalid date of birth</div>
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#ff5252' }}>Invalid date of birth</div>
               )}
               {ocrDone && formData.dateOfBirth && (
-                <div style={{ marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
-                  📋 Auto-filled from Aadhaar OCR. You can edit if needed.
+                <div style={{ marginTop: '4px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Locked — extracted from Aadhaar
                 </div>
               )}
             </div>
@@ -395,24 +395,20 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                 maxLength={12}
                 inputMode="numeric"
                 required
+                readOnly={ocrDone}
+                style={ocrDone ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
-                <small style={{ color: '#64748b', fontSize: '12px' }}>
-                  {ocrDone ? '📋 Extracted from Aadhaar card' : '12-digit number from Aadhaar'}
+                <small style={{ color: '#475569', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {ocrDone ? (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Locked — extracted from Aadhaar</>
+                  ) : '12-digit number from Aadhaar'}
                 </small>
                 <small style={{ color: aadhaarComplete ? '#00ff88' : '#64748b', fontSize: '12px', fontWeight: aadhaarComplete ? 600 : 400 }}>
                   {formData.aadhaarNumber.length}/12 {aadhaarComplete && '✓'}
                 </small>
               </div>
             </div>
-
-            {/* Minor warning */}
-            {isMinor && (
-              <div className="alert alert-warning" style={{ marginBottom: '16px', fontSize: '14px' }}>
-                ⚠️ <strong>Under 18:</strong> You can still get a RacePass, but age-restricted events
-                (concerts 18+, bars 21+) will deny access.
-              </div>
-            )}
 
             {error && <div className="alert alert-error" style={{ fontSize: '14px' }}>{error}</div>}
 
@@ -427,7 +423,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
                   <span className="spinner" style={{ width: '18px', height: '18px', borderWidth: '2px' }}></span>
                   Verifying...
                 </span>
-              ) : '🚀 Submit KYC'}
+              ) : 'Submit KYC'}
             </button>
           </form>
         )}
@@ -435,30 +431,22 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
         {/* ── Step 3: Success ── */}
         {success && (
           <div style={{ textAlign: 'center', padding: '30px 10px', animation: 'emerge3D 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-            <div style={{ fontSize: '80px', marginBottom: '16px', animation: 'bounceIn3D 0.8s' }}>🎉</div>
+            <div style={{ marginBottom: '16px', animation: 'bounceIn3D 0.8s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <h2 style={{ color: '#00ff88', marginBottom: '10px' }}>Verification Successful!</h2>
             <p style={{ color: '#94a3b8', marginBottom: '20px' }}>
               Your RacePass has been activated. Redirecting to dashboard...
             </p>
             <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-            {resultData?.isAdult === false && (
-              <div className="alert alert-warning">
-                Note: Your RacePass is active but marked as under-18. Some events may be restricted.
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {/* Privacy notice */}
       <div style={{
         maxWidth: '540px', textAlign: 'center', marginTop: '20px',
         color: '#64748b', fontSize: '12px', lineHeight: '1.6',
         animation: 'fadeInUp3D 0.8s 0.5s both'
       }}>
-        🔒 <strong>Privacy guarantee:</strong> Your Aadhaar image is processed
-        <strong> entirely in your browser</strong> using Tesseract.js OCR.
-        No image or personal data is ever sent to any server.
+        Your Aadhaar is processed <strong>entirely in-browser</strong> via Tesseract.js.
         Only a SHA-256 fingerprint is stored on-chain.
       </div>
     </div>

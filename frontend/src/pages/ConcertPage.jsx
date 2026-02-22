@@ -13,7 +13,7 @@ const EVENTS = [
   {
     id: 'concert',
     name: 'Electric Dreams Festival 2025',
-    emoji: '🎸',
+    emoji: 'R',
     tagline: 'The biggest music event of the year!',
     minAge: 18,
     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
@@ -23,17 +23,17 @@ const EVENTS = [
   {
     id: 'bar',
     name: 'Skyline Sports Bar',
-    emoji: '🍺',
+    emoji: 'B',
     tagline: 'Watch the finals with a cold one.',
     minAge: 21,
-    gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+    gradient: 'linear-gradient(135deg, #00cc66 0%, #00ff88 100%)',
     ticketLabel: 'ENTRY PASS',
-    shadowColor: 'rgba(99, 102, 241, 0.3)'
+    shadowColor: 'rgba(0, 204, 102, 0.3)'
   },
   {
     id: 'gallery',
     name: 'Modern Art Exhibition',
-    emoji: '🎨',
+    emoji: 'A',
     tagline: 'Open to all art lovers.',
     minAge: 0,
     gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
@@ -62,7 +62,7 @@ function EventCard3D({ event, index, onClick }) {
         {event.minAge > 0 ? `${event.minAge}+ Only` : 'All Ages'}
       </div>
       <button className="btn btn-primary" style={{ width: '100%', marginTop: '15px', fontSize: '14px' }}>
-        🧪 Verify & Enter
+        Verify & Enter
       </button>
     </div>
   )
@@ -127,8 +127,8 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
     return (
       <div>
         <div className="concert-header" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
-          <h1 className="concert-title">🎪 Event Marketplace</h1>
-          <p style={{ color: 'rgba(255,255,255,0.8)' }}>Choose an event to test RacePass age-gated verification</p>
+          <h1 className="concert-title">Event Marketplace</h1>
+          <p style={{ color: 'rgba(255,255,255,0.8)' }}>Choose an event to verify with RacePass</p>
         </div>
 
         <div className="page-center" style={{ minHeight: 'calc(100vh - 300px)' }}>
@@ -151,16 +151,16 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
             maxWidth: '720px', width: '100%', marginTop: '30px',
             animation: 'fadeUp 0.5s 0.2s both'
           }}>
-            <h3 style={{ color: '#00d9ff', marginBottom: '15px' }}>How It Works</h3>
+            <h3 style={{ color: '#00ff88', marginBottom: '15px' }}>How It Works</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: '#94a3b8' }}>
               {[
-                { step: 1, text: 'Connect your wallet' },
-                { step: 2, text: 'We check your RacePass credential' },
-                { step: 3, text: 'Access granted or denied instantly' }
+                { step: 1, text: 'Connect wallet' },
+                { step: 2, text: 'RacePass credential is checked' },
+                { step: 3, text: 'Access granted or denied' }
               ].map(s => (
                 <div key={s.step} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <span style={{
-                    background: 'linear-gradient(135deg, #00d9ff, #6366f1)', color: '#0a0a14',
+                    background: 'linear-gradient(135deg, #00ff88, #00cc66)', color: '#0a0a14',
                     borderRadius: '50%', width: '32px', height: '32px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 'bold', flexShrink: 0
@@ -195,7 +195,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
           {status === 'checking' && (
             <>
               <div className="spinner" style={{ margin: '40px auto' }}></div>
-              <h2 style={{ color: '#00d9ff' }}>Verifying...</h2>
+              <h2 style={{ color: '#00ff88' }}>Verifying...</h2>
               <p style={{ color: '#94a3b8', marginTop: '10px' }}>Checking your RacePass {event.minAge > 0 ? `(${event.minAge}+ required)` : ''}</p>
             </>
           )}
@@ -203,7 +203,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
           {/* Verified */}
           {status === 'verified' && (
             <>
-              <div style={{ fontSize: '80px', marginBottom: '10px', animation: 'bounceIn3D 0.8s' }}>🎉</div>
+              <div style={{ marginBottom: '10px', animation: 'bounceIn3D 0.8s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
               <h2 style={{ color: '#00ff88' }}>Access Granted!</h2>
 
               <div className="ticket-card-3d" style={{
@@ -218,7 +218,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
                 <div style={{ position: 'absolute', top: '8px', right: '12px', fontSize: '10px', opacity: 0.7 }}>
                   {event.minAge > 0 ? `${event.minAge}+ ✓` : 'All Ages'}
                 </div>
-                <div style={{ fontSize: '28px', marginBottom: '10px', animation: 'floatY 4s ease-in-out infinite' }}>🎫 {event.ticketLabel}</div>
+                <div style={{ fontSize: '28px', marginBottom: '10px', animation: 'floatY 4s ease-in-out infinite' }}>{event.ticketLabel}</div>
                 <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{event.name}</div>
                 <div style={{ fontSize: '14px', marginTop: '10px', opacity: 0.9, fontFamily: 'monospace' }}>
                   {walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}
@@ -233,7 +233,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
               )}
 
               <div className="alert alert-success">
-                🔒 Your identity was verified without sharing any personal data.
+                Identity verified without sharing personal data.
               </div>
 
               <button className="btn btn-secondary" onClick={handleBack} style={{ marginTop: '15px' }}>← Back to Events</button>
@@ -243,12 +243,12 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
           {/* Age Blocked */}
           {status === 'age-blocked' && (
             <>
-              <div style={{ fontSize: '80px', marginBottom: '10px', animation: 'bounceIn 0.6s' }}>🚫</div>
+              <div style={{ marginBottom: '10px', animation: 'bounceIn 0.6s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffc107" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
               <h2 style={{ color: '#ffc107' }}>Age Restricted</h2>
               <p style={{ color: '#94a3b8', margin: '15px 0' }}>{reason}</p>
 
               <div className="alert" style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid #ffc107', color: '#ffc107' }}>
-                Your identity IS verified, but this event requires age {event.minAge}+. Your RacePass indicates you don't meet the requirement. No personal data was exposed.
+                This event requires age {event.minAge}+. No personal data was exposed.
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
@@ -260,7 +260,7 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
           {/* Not Verified */}
           {status === 'not-verified' && (
             <>
-              <div style={{ fontSize: '80px', marginBottom: '10px', animation: 'bounceIn 0.6s' }}>❌</div>
+              <div style={{ marginBottom: '10px', animation: 'bounceIn 0.6s' }}><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
               <h2 style={{ color: '#ff5252' }}>Not Verified</h2>
               <p style={{ color: '#94a3b8', margin: '15px 0' }}>
                 {reason || 'Your wallet is not verified yet.'}
@@ -278,8 +278,8 @@ function ConcertPage({ isWalletConnected, walletAddress, onConnectWallet, select
               }}>
                 <div style={{ color: '#ff5252', fontWeight: 'bold', marginBottom: '10px' }}>To get access:</div>
                 <ol style={{ paddingLeft: '20px', color: '#94a3b8', fontSize: '14px' }}>
-                  <li>Go to RacePass Signup and complete KYC</li>
-                  <li>Come back here and try again</li>
+                  <li>Complete KYC on RacePass</li>
+                  <li>Return here and verify</li>
                 </ol>
               </div>
 
