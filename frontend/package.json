@@ -12,6 +12,7 @@
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^1.12.58",
     "ethers": "^6.9.0",
+    "face-api.js": "^0.22.2",
     "framer-motion": "^12.34.3",
     "html5-qrcode": "^2.3.8",
     "qrcode.react": "^4.2.0",

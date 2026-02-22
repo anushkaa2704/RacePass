@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { submitKYC } from '../utils/api'
 import { isMetaMaskInstalled } from '../utils/wallet'
 import { extractAadhaarData } from '../utils/aadhaarOCR'
+import { compareFaces, loadFaceModels } from '../utils/faceMatch'
 
 function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVerified }) {
   const navigate = useNavigate()
@@ -54,6 +55,12 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
 
   // Drag state for the drop zone
   const [dragging, setDragging] = useState(false)
+
+  // Face match states
+  const [faceMatchStatus, setFaceMatchStatus] = useState(null) // null | 'loading' | 'match' | 'mismatch' | 'error'
+  const [faceMatchScore, setFaceMatchScore] = useState(null)
+  const [faceMatchError, setFaceMatchError] = useState('')
+  const [modelsReady, setModelsReady] = useState(false)
 
   // 3D tilt removed for performance
 
@@ -115,8 +122,44 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
 
   const retakePhoto = () => {
     setLivePhoto(null)
+    setFaceMatchStatus(null)
+    setFaceMatchScore(null)
+    setFaceMatchError('')
     startCamera()
   }
+
+  // ── Preload face models on mount ──
+  useEffect(() => {
+    loadFaceModels().then(() => setModelsReady(true)).catch(() => {})
+  }, [])
+
+  // ── Auto-compare faces when both images ready ──
+  useEffect(() => {
+    if (!livePhoto || !imageFile || !modelsReady) return
+    let cancelled = false
+
+    async function runFaceMatch() {
+      setFaceMatchStatus('loading')
+      setFaceMatchError('')
+      setFaceMatchScore(null)
+      try {
+        const result = await compareFaces(livePhoto, imageFile)
+        if (cancelled) return
+        setFaceMatchScore(result.score)
+        setFaceMatchStatus(result.match ? 'match' : 'mismatch')
+        if (!result.match) {
+          setFaceMatchError(`Face mismatch (${result.score}% similarity). The selfie does not match the Aadhaar photo.`)
+        }
+      } catch (err) {
+        if (cancelled) return
+        setFaceMatchStatus('error')
+        setFaceMatchError(err.message || 'Face comparison failed')
+      }
+    }
+
+    runFaceMatch()
+    return () => { cancelled = true }
+  }, [livePhoto, imageFile, modelsReady])
 
   // ── Live age calculation ──
   const age = useMemo(() => {
@@ -207,6 +250,9 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
     setIsAadhaar(null)
     setOcrError('')
     setOcrProgress(0)
+    setFaceMatchStatus(null)
+    setFaceMatchScore(null)
+    setFaceMatchError('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -219,6 +265,10 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
       if (!imageFile) throw new Error('Please upload your Aadhaar card image')
       if (isAadhaar === false) throw new Error('Please upload a valid Aadhaar card image')
       if (!livePhoto) throw new Error('Please capture a live photo for authentication')
+      if (faceMatchStatus === 'mismatch') throw new Error('Face verification failed — your selfie does not match the Aadhaar photo')
+      if (faceMatchStatus === 'error') throw new Error('Face verification could not be completed. Please retake your photo.')
+      if (faceMatchStatus === 'loading') throw new Error('Face verification is still in progress. Please wait.')
+      if (faceMatchStatus !== 'match') throw new Error('Face verification is required before submitting')
       if (!formData.fullName.trim()) throw new Error('Please enter your full name')
       if (!formData.dateOfBirth) throw new Error('Date of birth is required — it should be extracted from the Aadhaar')
       if (isInvalidAge) throw new Error('Invalid date of birth')
@@ -463,6 +513,80 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               )}
             </div>
 
+            {/* ── Face Match Status ── */}
+            {livePhoto && imageFile && (
+              <div style={{ marginTop: '24px', marginBottom: '8px', animation: 'fadeIn 0.4s' }}>
+                <label className="form-label" style={{ marginBottom: '10px' }}>
+                  3. Face Verification
+                </label>
+                {faceMatchStatus === 'loading' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '14px 18px', borderRadius: '12px',
+                    background: 'rgba(0, 255, 136, 0.06)', border: '1px solid rgba(0, 255, 136, 0.15)'
+                  }}>
+                    <span className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></span>
+                    <div>
+                      <div style={{ color: '#e2e8f0', fontSize: '14px', fontWeight: 600 }}>Comparing faces...</div>
+                      <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>Analyzing selfie against Aadhaar photo</div>
+                    </div>
+                  </div>
+                )}
+                {faceMatchStatus === 'match' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '14px 18px', borderRadius: '12px',
+                    background: 'rgba(0, 255, 136, 0.08)', border: '1px solid rgba(0, 255, 136, 0.3)'
+                  }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <div>
+                      <div style={{ color: '#00ff88', fontSize: '14px', fontWeight: 700 }}>Face Match Verified ✓</div>
+                      <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+                        {faceMatchScore}% similarity — Selfie matches Aadhaar photo
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {faceMatchStatus === 'mismatch' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '14px 18px', borderRadius: '12px',
+                    background: 'rgba(255, 82, 82, 0.08)', border: '1px solid rgba(255, 82, 82, 0.3)'
+                  }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    <div>
+                      <div style={{ color: '#ff5252', fontSize: '14px', fontWeight: 700 }}>Face Mismatch ✗</div>
+                      <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+                        {faceMatchScore}% similarity — The selfie does not match the Aadhaar photo. Please retake your selfie or re-upload the Aadhaar.
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {faceMatchStatus === 'error' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '14px 18px', borderRadius: '12px',
+                    background: 'rgba(255, 193, 7, 0.08)', border: '1px solid rgba(255, 193, 7, 0.3)'
+                  }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffc107" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <div>
+                      <div style={{ color: '#ffc107', fontSize: '14px', fontWeight: 700 }}>Face Detection Failed</div>
+                      <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+                        {faceMatchError}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="form-divider">
               <span>Extracted Details</span>
             </div>
@@ -549,7 +673,7 @@ function SignupPage({ isWalletConnected, walletAddress, onConnectWallet, setIsVe
               type="submit"
               className="btn btn-primary btn-glow"
               style={{ width: '100%', padding: '14px', fontSize: '16px', marginTop: '8px' }}
-              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false || !livePhoto || !imageFile}
+              disabled={isLoading || isInvalidAge || ocrRunning || isAadhaar === false || !livePhoto || !imageFile || faceMatchStatus !== 'match'}
             >
               {isLoading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
