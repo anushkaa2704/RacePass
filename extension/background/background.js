@@ -15,7 +15,7 @@
  *   GRANT_ACCESS      → Tell the content script to unlock the website
  */
 
-const BACKEND_URL = 'http://localhost:3001'
+const BACKEND_URL = "https://racepass-lyxu.onrender.com"
 
 // ── Listen for messages from popup & content scripts ──
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
