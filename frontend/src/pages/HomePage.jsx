@@ -9,12 +9,12 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useSpring, useTransform, AnimatePresence } from 'framer-motion'
 
 const FEATURE_ICONS = {
-  lock: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-  camera: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>,
-  shield: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  zap: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-  check: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-  user: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  lock: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
+  camera: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>,
+  shield: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+  zap: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+  check: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>,
+  user: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
 }
 
 const FEATURES = [
@@ -161,7 +161,8 @@ function PageLoader() {
           gap: '12px'
         }}
       >
-        <div className="logo" style={{ fontSize: '32px' }}>
+        <div className="logo" style={{ fontSize: '32px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
           Race<span>Pass</span>
         </div>
         <div style={{ color: '#00cc66', fontSize: '12px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
@@ -273,21 +274,27 @@ function HomePage() {
             {/* LEFT: Identity Text */}
             <div
               ref={heroTilt}
+              className="glass-glow-section"
               style={{
                 flex: '1 1 500px',
                 animation: 'title3DIn 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
                 transformStyle: 'preserve-3d',
-                textAlign: 'left'
+                textAlign: 'left',
+                padding: '40px',
+                background: 'rgba(255, 255, 255, 0.01)',
+                borderRadius: '32px',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.03)'
               }}
             >
-              <h1 className="page-title" style={{ fontSize: '64px', lineHeight: 1.1, marginBottom: '20px' }}>
+              <h1 className="page-title" style={{ fontSize: '64px', lineHeight: 1.1, marginBottom: '20px', textAlign: 'left' }}>
                 Your Identity,<br />
-                <span className="gradient-text" style={{ fontSize: '72px', color: '#00ff88' }}>
+                <span className="gradient-text" style={{ fontSize: '72px' }}>
                   Your Control
                 </span>
               </h1>
 
-              <p className="page-description" style={{ fontSize: '18px', maxWidth: '540px', color: '#94a3b8' }}>
+              <p className="page-description" style={{ fontSize: '18px', maxWidth: '540px', color: '#94a3b8', textAlign: 'left', animation: 'none', opacity: 1 }}>
                 RacePass lets you verify once and use everywhere.
                 Upload your Aadhaar, get verified in seconds, and stay private.
               </p>
@@ -295,7 +302,6 @@ function HomePage() {
               {/* CTA Buttons in Hero */}
               <div style={{
                 display: 'flex', gap: '16px', marginTop: '40px',
-                animation: 'fadeInUp3D 0.8s 0.4s both',
                 perspective: '600px'
               }}>
                 <Link to="/signup" className="btn btn-primary btn-glow" style={{ padding: '16px 40px', fontSize: '16px' }}>
@@ -312,12 +318,49 @@ function HomePage() {
               flex: '1 1 400px',
               height: '500px',
               animation: 'emerge3D 1s cubic-bezier(0.16, 1, 0.3, 1)',
-              minWidth: '350px'
+              minWidth: '350px',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              <Spline
-                scene="https://prod.spline.design/1C5t0fuuM-SHmRA8/scene.splinecode"
-                style={{ width: '100%', height: '100%' }}
+              {/* Dynamic spotlight behind the Spline model */}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '150%',
+                  height: '150%',
+                  background: 'radial-gradient(circle, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0.1) 40%, transparent 80%)',
+                  borderRadius: '50%',
+                  filter: 'blur(80px)',
+                  zIndex: 0,
+                  pointerEvents: 'none',
+                  animation: 'rotateGlow 8s linear infinite'
+                }}
               />
+
+              {/* Secondary pulse glow */}
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                  position: 'absolute',
+                  width: '90%',
+                  height: '90%',
+                  background: 'radial-gradient(circle, rgba(0, 255, 136, 0.3) 0%, transparent 70%)',
+                  borderRadius: '50%',
+                  filter: 'blur(50px)',
+                  zIndex: 0,
+                  pointerEvents: 'none'
+                }}
+              />
+
+              <div style={{ width: '100%', height: '100%', position: 'relative', zIndex: 1, mixBlendMode: 'screen' }}>
+                <Spline
+                  scene="https://prod.spline.design/1C5t0fuuM-SHmRA8/scene.splinecode"
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -586,10 +629,10 @@ function HomePage() {
             backdropFilter: 'blur(8px)',
             marginBottom: '100px'
           }}>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> <strong style={{ color: '#00ff88' }}>Zero-Knowledge</strong> design</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> <strong style={{ color: '#00ff88' }}>In-browser</strong> OCR processing</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> <strong style={{ color: '#00ff88' }}>On-chain</strong> fingerprint only</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> <strong style={{ color: '#00ff88' }}>Revocable</strong> anytime</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> <strong style={{ color: '#00ff88' }}>Zero-Knowledge</strong> design</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> <strong style={{ color: '#00ff88' }}>In-browser</strong> OCR processing</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> <strong style={{ color: '#00ff88' }}>On-chain</strong> fingerprint only</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> <strong style={{ color: '#00ff88' }}>Revocable</strong> anytime</span>
           </div>
 
           {/* ── Footer ── */}
@@ -614,7 +657,8 @@ function HomePage() {
             }}>
               {/* Logo Section */}
               <div style={{ flex: '1 1 300px' }}>
-                <div className="logo" style={{ marginBottom: '20px', display: 'inline-block' }}>
+                <div className="logo" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px' }} />
                   Race<span>Pass</span>
                 </div>
                 <p style={{ color: '#64748b', fontSize: '15px', lineHeight: 1.6, maxWidth: '280px' }}>

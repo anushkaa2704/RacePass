@@ -47,8 +47,9 @@ function LandingPage({ isWalletConnected, walletAddress, onConnectWallet, setUse
     <div className="page-center" style={{ minHeight: 'calc(100vh - 120px)' }}>
       {/* Hero */}
       <div style={{ textAlign: 'center', marginBottom: '48px', animation: 'fadeUp 0.6s ease' }}>
-        <div style={{ marginBottom: '16px' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        <h1 className="page-title" style={{ fontSize: '48px' }}>
+        <div style={{ marginBottom: '16px' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg></div>
+        <h1 className="page-title" style={{ fontSize: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '48px', height: '48px' }} />
           Welcome to <span className="gradient-text">RacePass</span>
         </h1>
         <p className="page-description" style={{ maxWidth: '560px' }}>
@@ -81,7 +82,7 @@ function LandingPage({ isWalletConnected, walletAddress, onConnectWallet, setUse
               e.currentTarget.style.boxShadow = ''
             }}
           >
-            <div style={{ marginBottom: '16px' }}><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div style={{ marginBottom: '16px' }}><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg></div>
             <h2 style={{ color: '#00ff88', fontSize: '22px', marginBottom: '8px' }}>Event Organizer</h2>
             <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
               Create events, set verification requirements,
@@ -92,10 +93,10 @@ function LandingPage({ isWalletConnected, walletAddress, onConnectWallet, setUse
               textAlign: 'left', padding: '12px', background: 'rgba(0,255,136,0.04)',
               borderRadius: '10px', border: '1px solid rgba(0,255,136,0.1)'
             }}>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> Create unlimited events</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> Set age & identity requirements</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> Real-time registration alerts</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> QR ticket scanning at entry</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> Create unlimited events</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> Set age & identity requirements</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> Real-time registration alerts</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> QR ticket scanning at entry</span>
             </div>
             <button className="btn btn-primary" style={{
               width: '100%', marginTop: '20px'
@@ -123,7 +124,7 @@ function LandingPage({ isWalletConnected, walletAddress, onConnectWallet, setUse
               e.currentTarget.style.boxShadow = ''
             }}
           >
-            <div style={{ marginBottom: '16px' }}><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#00cc66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <div style={{ marginBottom: '16px' }}><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#00cc66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg></div>
             <h2 style={{ color: '#00cc66', fontSize: '22px', marginBottom: '8px' }}>Event Attendee</h2>
             <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
               Browse events, verify your identity with zero-knowledge proofs,
@@ -134,10 +135,10 @@ function LandingPage({ isWalletConnected, walletAddress, onConnectWallet, setUse
               textAlign: 'left', padding: '12px', background: 'rgba(0,255,136,0.04)',
               borderRadius: '10px', border: '1px solid rgba(0,255,136,0.1)'
             }}>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> Browse all events</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> ZKP age verification (no data shared)</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> Instant QR ticket generation</span>
-              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}}><polyline points="20 6 9 17 4 12"/></svg> One KYC for all events</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> Browse all events</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> ZKP age verification (no data shared)</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> Instant QR ticket generation</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><polyline points="20 6 9 17 4 12" /></svg> One KYC for all events</span>
             </div>
             <button className="btn btn-primary" style={{
               width: '100%', marginTop: '20px'

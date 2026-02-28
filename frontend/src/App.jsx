@@ -44,7 +44,7 @@ class ErrorBoundary extends Component {
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexDirection: 'column', background: '#0a0a14', color: '#fff', padding: '40px'
         }}>
-          <div style={{ marginBottom: '20px', animation: 'bounceIn3D 0.8s' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div style={{ marginBottom: '20px', animation: 'bounceIn3D 0.8s' }}><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff5252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg></div>
           <h1 style={{ color: '#ff5252', marginBottom: '10px' }}>Something went wrong</h1>
           <p style={{ color: '#94a3b8', maxWidth: '500px', textAlign: 'center', marginBottom: '20px' }}>
             {this.state.error?.message || 'An unexpected error occurred.'}
@@ -188,7 +188,10 @@ function App() {
             boxShadow: scrolled ? '0 4px 30px rgba(0, 0, 0, 0.3)' : 'none',
             transition: 'all 0.4s ease'
           }}>
-            <Link to="/" className="logo">Race<span>Pass</span></Link>
+            <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <img src="/logo.png" alt="Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+              Race<span>Pass</span>
+            </Link>
             <nav className="nav">
               <Link to="/" className="nav-link">Home</Link>
               <Link to="/landing" className="nav-link">Login</Link>
@@ -217,7 +220,7 @@ function App() {
                   textDecoration: 'none',
                   cursor: 'pointer'
                 }}>
-                  <span style={{display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',background:'#00ff88'}}></span>
+                  <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88' }}></span>
                   <span className="wallet-address">{shortenAddress(walletAddress)}</span>
                 </Link>
               ) : (
